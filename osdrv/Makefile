@@ -136,17 +136,18 @@ hiboot_clean:
 ##########################################################################################
 hikernel: prepare
 	@echo "---------task [2] build kernel"
-	rm $(OSDRV_DIR)/opensource/kernel/linux-3.10.y -rf
-	tar xzf $(OSDRV_DIR)/opensource/kernel/$(KERNEL_TAR) -C $(OSDRV_DIR)/opensource/kernel/
+	# rm $(OSDRV_DIR)/opensource/kernel/linux-3.10.y -rf
+	# tar xzf $(OSDRV_DIR)/opensource/kernel/$(KERNEL_TAR) -C $(OSDRV_DIR)/opensource/kernel/
 	find $(OSDRV_DIR)/opensource/kernel/linux-3.10.y | xargs touch
-	make -C $(OSDRV_DIR)/opensource/kernel/linux-3.10.y ARCH=arm CROSS_COMPILE=$(OSDRV_CROSS)- $(KERNEL_CFG)
+	make -C $(OSDRV_DIR)/opensource/kernel/linux-3.10.y ARCH=arm CROSS_COMPILE=$(OSDRV_CROSS)- $(KERNEL_CFG) -j4
 	pushd $(OSDRV_DIR)/opensource/kernel/linux-3.10.y;make ARCH=arm CROSS_COMPILE=$(OSDRV_CROSS)- -j 20 >/dev/null;popd
 	pushd $(OSDRV_DIR)/opensource/kernel/linux-3.10.y;\
 		make ARCH=arm CROSS_COMPILE=$(OSDRV_CROSS)- uImage -j 20 >/dev/null;popd
 	cp $(OSDRV_DIR)/opensource/kernel/linux-3.10.y/arch/arm/boot/uImage $(OSDRV_DIR)/pub/$(PUB_IMAGE)/$(UIMAGE)
 
 hikernel_clean:
-	rm $(OSDRV_DIR)/opensource/kernel/linux-3.10.y -rf
+	make -C $(OSDRV_DIR)/opensource/kernel/linux-3.10.y distclean
+	# rm $(OSDRV_DIR)/opensource/kernel/linux-3.10.y -rf
 
 ##########################################################################################
 #task [3]	prepare rootfs 
