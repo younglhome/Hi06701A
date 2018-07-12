@@ -42,6 +42,114 @@ int it6801_close(struct inode * inode, struct file * file)
     return 0;
 }
 
+static int it6801_vin_get_width(void)
+{
+	unsigned char mDataIn;
+	i2c_read_byte(0x90, 0x9E, 1, &mDataIn, 0);
+	int width = mDataIn;
+	i2c_read_byte(0x90, 0x9F, 1, &mDataIn, 0);
+	width = width | ((mDataIn & 0b00111111) << 8);
+	
+    return width;
+}
+
+static int it6801_vin_get_heigth(void)
+{
+	unsigned char mDataIn;
+	i2c_read_byte(0x90, 0xA4, 1, &mDataIn, 0);
+	int height = (mDataIn >> 4) << 8;
+	i2c_read_byte(0x90, 0xA5, 1, &mDataIn, 0);
+	height = height | mDataIn;
+
+    return height;
+}
+
+typedef enum vin_resolution_id {
+	VIN_RESOLUTION_1920x1080P  = 1,
+	VIN_RESOLUTION_1280x1024P  = 5,
+	VIN_RESOLUTION_1280x800P   = 6,
+	VIN_RESOLUTION_1280x768P   = 7,
+	VIN_RESOLUTION_1280x720P   = 2,
+	VIN_RESOLUTION_720x576P    = 3,
+	VIN_RESOLUTION_720x480P    = 4,
+	VIN_RESOLUTION_640x480P    = 8,
+
+	VIN_RESOLUTION_UNKOWN      = -1
+} vin_resolution_id_e;
+
+
+static vin_resolution_id_e it6801_vin_get_resolution(void)
+{
+	int width  = it6801_vin_get_width();
+	int height = it6801_vin_get_heigth();	
+	printk("Vin width[%d],height[%d]\n",width,height); 
+	switch(width)
+	{
+		case 1920:
+			return VIN_RESOLUTION_1920x1080P;
+			break;
+		case 1280:
+			switch(height)
+			{
+				case 1024:
+					return VIN_RESOLUTION_1280x1024P;
+					break;
+				case 800:
+					return VIN_RESOLUTION_1280x800P;	
+					break;
+				case 768:
+					return VIN_RESOLUTION_1280x768P;
+					break;
+				case 720:
+					return VIN_RESOLUTION_1280x720P;	
+					break;
+				default:
+					return VIN_RESOLUTION_UNKOWN;
+					break;
+			}
+			break;
+		case 720:
+			switch(height)
+			{
+				case 576:
+					return VIN_RESOLUTION_720x576P;
+					break;
+				case 480:
+					return VIN_RESOLUTION_720x480P;	
+					break;
+				default:
+					return VIN_RESOLUTION_UNKOWN;
+					break;
+			}
+			break;
+		case 640:
+			return VIN_RESOLUTION_640x480P;
+		default:
+			printk("Vin: unknown resolution");
+			return VIN_RESOLUTION_UNKOWN;
+			break;
+	}
+}
+
+typedef enum vin_frame_mode {
+	frame_progressive_mode = 0,
+	frame_interlaced_mode  = 1
+} vin_frame_mode_e;
+
+static vin_frame_mode_e it6801_vin_get_frame_mode(void)
+{
+	unsigned char mDataIn;
+	//i2c_read_byte(0x90, 0x9A, 1, &mDataIn, 0);
+	//printk("PCLK0x9A 0x%x\n",mDataIn); 
+	//i2c_read_byte(0x90, 0x9D, 1, &mDataIn, 0);
+	//printk("0x9D 0x%x\n",mDataIn); 
+	i2c_read_byte(0x90, 0x99, 1, &mDataIn, 0);
+	//printk("mDataIn 0x%x\n",mDataIn);  
+	bool is_interlaced_mode = mDataIn & 0x02;
+	return ((is_interlaced_mode) ? frame_interlaced_mode : frame_progressive_mode);
+
+}
+
 int it6801_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
 {
     void __user *argp = (void __user *)arg;
@@ -49,64 +157,12 @@ int it6801_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
 		
 	if(cmd == 0x10)
 	{
-		//i2c_read_byte(0x90, 0x9A, 1, &mDataIn, 0);
-		//printk("PCLK0x9A 0x%x\n",mDataIn); 
-		//i2c_read_byte(0x90, 0x9D, 1, &mDataIn, 0);
-		//printk("0x9D 0x%x\n",mDataIn); 
-		i2c_read_byte(0x90, 0x99, 1, &mDataIn, 0);
-		//printk("mDataIn 0x%x\n",mDataIn);  
-		#define INTERLACED_MODE (1)
-		#define PROGRESSIVE_MODE (0)
-		bool is_interlaced_mode = mDataIn & 0x02;
-		if(is_interlaced_mode) {
-			return INTERLACED_MODE;
-		} else {
-			return PROGRESSIVE_MODE;
-		}
+		return it6801_vin_get_frame_mode();
 	}
 	
 	if(cmd == 0x12)
 	{
-		i2c_read_byte(0x90, 0x9F, 1, &mDataIn, 0);  //9F= 7(1920),5(1280),2(720)
-		printk("9F 0x%x\n",mDataIn); 
-#if 1
-		switch(mDataIn)
-		{
-			case 7://1920
-				return 1;
-				break;
-			case 5://1280
-				return 2;
-			case 2://720
-				i2c_read_byte(0x90, 0xA5, 1, &mDataIn, 0);
-				//printk("0xA5 0x%x\n",mDataIn); 
-				if(40 == mDataIn) {
-					return 3;
-				} else {
-					return 4;	
-				}
-				break;
-			default:
-				printk("Vin: unknown resolution");
-				return -1;
-				break;
-		}
-#else				  
-		if(5==mDataIn) { //1280x720
-					return 2;	
-		}	
-		if(2==mDataIn) {	//720x
-			i2c_read_byte(0x90, 0xA5, 1, &mDataIn, 0);
-			//printk("0xA5 0x%x\n",mDataIn); 
-			if(40==mDataIn) {
-					return 3;
-			} else {
-					return 4;	
-			}
-		}	
-		//if(7==mDataIn)	
-			return 1;
-#endif
+		return it6801_vin_get_resolution();
 	}
 	
 	if(cmd == 0x15)
