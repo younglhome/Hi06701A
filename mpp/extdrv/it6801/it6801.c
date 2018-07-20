@@ -274,15 +274,18 @@ static int __init it6801_init(void)
 
 		delay1ms(1000);	//for power sequence
 		
-		//printk("IT6802_fsm_init\n");
+		//printk("IT6802_fsm_init\n"	);
 		IT6802_fsm_init();
+		BYTE p_data = 0x80;
+		i2c_write_byte(0x90, 0x77, 1, &p_data, 0);
+		printk("it6801: output audio mlck");
 
 
-		init_timer(&checker);
-		checker.function = (void *)checker_handler;
+		//init_timer(&checker);
+		//checker.function = (void *)checker_handler;
 
-		checker.expires =  200 + jiffies;
-		add_timer(&checker);
+		//checker.expires =  200 + jiffies;
+		//add_timer(&checker);
 
     return 0;
 }

@@ -356,7 +356,8 @@ void hi_dev_init(void)
 
 void hi_dev_exit(void)
 {
-    //i2c_unregister_device(hdmi_client);
+    i2c_unregister_device(hdmi_client);
+	i2c_unregister_device(edid_client);
 }
 
 /*
