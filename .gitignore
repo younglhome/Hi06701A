@@ -1,0 +1,98 @@
+# Prerequisites
+*.d
+
+# Object files
+*.o
+*.ko
+*.obj
+*.elf
+
+# Linker output
+*.ilk
+*.map
+*.exp
+
+# Precompiled Headers
+*.gch
+*.pch
+
+# Libraries
+*.lib
+*.a
+*.la
+*.lo
+
+# Shared objects (inc. Windows DLLs)
+*.dll
+*.so
+*.so.*
+*.dylib
+
+# Executables
+*.exe
+*.out
+*.app
+*.i*86
+*.x86_64
+*.hex
+
+# Debug files
+*.dSYM/
+*.su
+*.idb
+*.pdb
+
+# Kernel Module Compile Results
+*.mod*
+*.cmd
+.tmp_versions/
+modules.order
+Module.symvers
+Mkfile.old
+dkms.conf
+
+# user define here
+*.builtin
+.config
+.tmp_vmlinux*
+.version
+*.S
+*Image
+osdrv/opensource/busybox/busybox-1.20.2/
+osdrv/opensource/kernel/linux-3.10.y/arch/arm/boot/compressed/piggy.gzip
+osdrv/opensource/kernel/linux-3.10.y/arch/arm/boot/compressed/vmlinux
+osdrv/opensource/kernel/linux-3.10.y/arch/arm/boot/compressed/vmlinux.lds
+osdrv/opensource/kernel/linux-3.10.y/arch/arm/include/generated/
+osdrv/opensource/kernel/linux-3.10.y/arch/arm/kernel/asm-offsets.s
+osdrv/opensource/kernel/linux-3.10.y/arch/arm/kernel/vmlinux.lds
+osdrv/opensource/kernel/linux-3.10.y/drivers/tty/vt/consolemap_deftbl.c
+osdrv/opensource/kernel/linux-3.10.y/drivers/tty/vt/defkeymap.c
+osdrv/opensource/kernel/linux-3.10.y/include/config/
+osdrv/opensource/kernel/linux-3.10.y/include/generated/
+osdrv/opensource/kernel/linux-3.10.y/kernel/bounds.s
+osdrv/opensource/kernel/linux-3.10.y/kernel/hz.bc
+osdrv/opensource/kernel/linux-3.10.y/kernel/timeconst.h
+osdrv/opensource/kernel/linux-3.10.y/lib/crc32table.h
+osdrv/opensource/kernel/linux-3.10.y/lib/gen_crc32table
+osdrv/opensource/kernel/linux-3.10.y/scripts/basic/fixdep
+osdrv/opensource/kernel/linux-3.10.y/scripts/conmakehash
+osdrv/opensource/kernel/linux-3.10.y/scripts/kallsyms
+osdrv/opensource/kernel/linux-3.10.y/scripts/kconfig/conf
+osdrv/opensource/kernel/linux-3.10.y/scripts/kconfig/zconf.hash.c
+osdrv/opensource/kernel/linux-3.10.y/scripts/kconfig/zconf.lex.c
+osdrv/opensource/kernel/linux-3.10.y/scripts/kconfig/zconf.tab.c
+osdrv/opensource/kernel/linux-3.10.y/scripts/mod/devicetable-offsets.h
+osdrv/opensource/kernel/linux-3.10.y/scripts/mod/devicetable-offsets.s
+osdrv/opensource/kernel/linux-3.10.y/scripts/mod/elfconfig.h
+osdrv/opensource/kernel/linux-3.10.y/scripts/mod/mk_elfconfig
+osdrv/opensource/kernel/linux-3.10.y/scripts/mod/modpost
+osdrv/opensource/kernel/linux-3.10.y/scripts/sortextable
+osdrv/opensource/kernel/linux-3.10.y/usr/gen_init_cpio
+osdrv/opensource/kernel/linux-3.10.y/usr/initramfs_data.cpio
+osdrv/opensource/kernel/linux-3.10.y/vmlinux
+osdrv/opensource/uboot/u-boot-2010.06/
+osdrv/pub/
+osdrv/tools/pc/jffs2_tool/tmp/
+osdrv/tools/pc/mkyaffs2image/bin/
+osdrv/tools/pc/mkyaffs2image/mkyaffs2image/
+osdrv/tools/pc/zlib/tmp/
