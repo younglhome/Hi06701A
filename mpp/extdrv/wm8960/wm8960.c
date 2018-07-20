@@ -198,87 +198,8 @@ void wm8960_reg_dump(unsigned int reg_num)
 }
 void soft_reset(unsigned int chip_num)
 {
-       /*soft reset*/ 
-        wm8960_write(IIC_device_addr[chip_num],0x1,0x80);
-        msleep(10);
-        
-        /*CLKDIV_IN uses MCLK*/
-    	wm8960_write(IIC_device_addr[chip_num], 102, 0x32);
-
-#if 1    	
-    	/*PLL disable and select Q value*/
-    	wm8960_write(IIC_device_addr[chip_num], 3, 0x10);
-#else
-        /*PLL enable */
-        wm8960_write(IIC_device_addr[chip_num], 3, 0x82);/* P=2 */
-        wm8960_write(IIC_device_addr[chip_num], 4, 0x1c);/* J=28 */
-        wm8960_write(IIC_device_addr[chip_num], 5, 0x2c);
-        wm8960_write(IIC_device_addr[chip_num], 6, 0x8);/* reg 5 and 6 set D=2818*/
-        wm8960_write(IIC_device_addr[chip_num], 11, 0x1);/* R=1 */
-#endif
-        /*left and right DAC open*/	
-        wm8960_write(IIC_device_addr[chip_num], 7,  0xa);/* FSref = 48 kHz */
-
-        /*sample*/
-    	wm8960_write(IIC_device_addr[chip_num], 2,  0xaa);/* FS = FSref/6 */
-                
-        /*ctrl mode*/
-        wm8960_write(IIC_device_addr[chip_num], 8,  0xf0);/* master mode */
-                
-        /*Audio Serial Data Interface Control*/	
-        wm8960_write(IIC_device_addr[chip_num], 9,  0x7);/* I2S mode,16bit */
-
-        /*Audio Codec Digital Filter Control Register*/	
-        wm8960_write(IIC_device_addr[chip_num], 12,  0x50);
-
-        //wm8960_write(IIC_device_addr[chip_num], 25,  0x0);
-        wm8960_write(IIC_device_addr[chip_num], 25,  0x40);
-        wm8960_write(IIC_device_addr[chip_num], 17,  0xf);
-        wm8960_write(IIC_device_addr[chip_num], 18,  0xf0);
-
-        wm8960_write(IIC_device_addr[chip_num], 15,  0x0);
-        wm8960_write(IIC_device_addr[chip_num], 16,  0x0);
-        //wm8960_write(IIC_device_addr[chip_num], 19,  0x7c);
-        //wm8960_write(IIC_device_addr[chip_num], 22,  0x7c);
-        
-        wm8960_write(IIC_device_addr[chip_num], 19,  0x04);
-        wm8960_write(IIC_device_addr[chip_num], 22,  0x04);
-        wm8960_write(IIC_device_addr[chip_num], 28,  0x0);
-        wm8960_write(IIC_device_addr[chip_num], 31,  0x0);
-            	
-        /*out ac-coupled*/	
-        wm8960_write(IIC_device_addr[chip_num], 14, 0x80);
-        
-        /*left and right DAC power on*/	
-        wm8960_write(IIC_device_addr[chip_num], 37, 0xc0);  
-
-        /*out common-mode voltage*/	
-        wm8960_write(IIC_device_addr[chip_num], 40, 0x80);
-        
-        /*out path select*/	
-        wm8960_write(IIC_device_addr[chip_num], 41, 0x1);    
-
-        /*out path select*/	
-        wm8960_write(IIC_device_addr[chip_num], 42, 0xa8);  
-        
-        /*left DAC not muted*/	
-        wm8960_write(IIC_device_addr[chip_num], 43, 0x0);    
-
-        /*right DAC not muted*/	
-        wm8960_write(IIC_device_addr[chip_num], 44, 0x0); 
-
-        wm8960_write(IIC_device_addr[chip_num], 47, 0x80); 
-            	
-        /*HPLOUT is not muted*/	
-        //wm8960_write(IIC_device_addr[chip_num], 51, 0x9f); 
-
-        wm8960_write(IIC_device_addr[chip_num], 64, 0x80); 
-        /*HPROUT is not muted*/	
-        //wm8960_write(IIC_device_addr[chip_num], 65, 0x9f); 
-                
-        /*out short circuit protection*/	
-        wm8960_write(IIC_device_addr[chip_num], 38, 0x3e);  
-            
+    wm8960_write(IIC_device_addr[chip_num],0xf,0x0);
+    msleep(10);
 }        	
 
 /*
@@ -768,23 +689,8 @@ static struct notifier_block wm8960_reboot_notifier =
 };
 static int wm8960_device_init(unsigned int num)
 {
-    #if 0
-        /* inite codec configs.*/
-        unsigned char temp = 0;
-        temp = wm8960_read(IIC_device_addr[num],0x2);
-        wm8960_write(IIC_device_addr[0],0x2,0xaa);
-        if( wm8960_read(IIC_device_addr[num],0x2) != 0xaa)
-        {
-            DPRINTK(0,"init aic31(%d) error",num);
-            return -1;
-        }
-        wm8960_write(IIC_device_addr[num],0x2,temp);
+    soft_reset(num);
 
-        soft_reset(num);
-
-    /* 注册reboot通知处理 */
-    register_reboot_notifier(&wm8960_reboot_notifier);
-    #endif
     int ret;
     unsigned int reg_addr, value;
     unsigned int reg_num = sizeof(wm8960_reg_defaults) / sizeof(struct reg_default);
@@ -801,6 +707,8 @@ static int wm8960_device_init(unsigned int num)
                 __FUNCTION__, reg_addr, value, ret);
         }
     }
+
+    // register_reboot_notifier(&wm8960_reboot_notifier);
     
     return 0;
 }
