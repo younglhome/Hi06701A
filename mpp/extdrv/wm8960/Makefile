@@ -18,6 +18,8 @@ endif
 EXTRA_CFLAGS += -I$(REL_INC)
 EXTRA_CFLAGS += $(DRV_CFLAGS)
 EXTRA_CFLAGS += -D$(HI_FPGA)
+# EXTRA_CFLAGS += -std=c99
+EXTRA_CFLAGS += -std=gnu99
 
 default:
 	@make -C $(LINUX_ROOT) M=$(PWD) modules 

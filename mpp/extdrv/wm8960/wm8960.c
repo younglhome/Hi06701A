@@ -60,7 +60,7 @@
 
 #include <linux/i2c.h>
 #include <linux/i2c-dev.h>
-
+#include <sound/wm8960.h>
 
 
 #include "wm8960.h"
@@ -77,11 +77,65 @@
     printk(KERN_INFO "%s [%s ,%d]: " fmt "\n",DEV_NAME,__FUNCTION__,__LINE__,##args);\
 }while(0)
 
-unsigned int IIC_device_addr[CHIP_NUM] = {0x30};
+unsigned int IIC_device_addr[CHIP_NUM] = {0x34};
 
-static struct i2c_board_info hi_info =
+static const struct reg_default wm8960_reg_defaults[] = {
+	{  0x0, 0x00a7 },
+	{  0x1, 0x00a7 },
+	{  0x2, 0x0000 },
+	{  0x3, 0x0000 },
+	{  0x4, 0x0000 },
+	{  0x5, 0x0008 },
+	{  0x6, 0x0000 },
+	{  0x7, 0x000a },
+	{  0x8, 0x01c0 },
+	{  0x9, 0x0000 },
+	{  0xa, 0x00ff },
+	{  0xb, 0x00ff },
+
+	{ 0x10, 0x0000 },
+	{ 0x11, 0x007b },
+	{ 0x12, 0x0100 },
+	{ 0x13, 0x0032 },
+	{ 0x14, 0x0000 },
+	{ 0x15, 0x00c3 },
+	{ 0x16, 0x00c3 },
+	{ 0x17, 0x01c0 },
+	{ 0x18, 0x0000 },
+	{ 0x19, 0x0000 },
+	{ 0x1a, 0x0000 },
+	{ 0x1b, 0x0000 },
+	{ 0x1c, 0x0000 },
+	{ 0x1d, 0x0000 },
+
+	{ 0x20, 0x0100 },
+	{ 0x21, 0x0100 },
+	{ 0x22, 0x0050 },
+
+	{ 0x25, 0x0050 },
+	{ 0x26, 0x0000 },
+	{ 0x27, 0x0000 },
+	{ 0x28, 0x0000 },
+	{ 0x29, 0x0000 },
+	{ 0x2a, 0x0040 },
+	{ 0x2b, 0x0000 },
+	{ 0x2c, 0x0000 },
+	{ 0x2d, 0x0050 },
+	{ 0x2e, 0x0050 },
+	{ 0x2f, 0x0000 },
+	{ 0x30, 0x0002 },
+	{ 0x31, 0x0037 },
+
+	{ 0x33, 0x0080 },
+	{ 0x34, 0x0008 },
+	{ 0x35, 0x0031 },
+	{ 0x36, 0x0026 },
+	{ 0x37, 0x00e9 },
+};
+
+static struct i2c_board_info wm8960_info =
 {
-    I2C_BOARD_INFO("wm8960", 0x30),
+    I2C_BOARD_INFO("wm8960", 0x34),
 };
 static struct i2c_client* wm_client;
 static unsigned int  open_cnt = 0;	
@@ -92,22 +146,32 @@ static struct himedia_device s_stWm8960Device;
 #endif
 
 static int wm8960_device_init(unsigned int num);
-int wm8960_write(unsigned char chip_addr, unsigned char reg_addr, unsigned char value)
+int wm8960_write(unsigned char chip_addr, unsigned int reg_addr, unsigned int value)
 {
-    int ret;
-    unsigned char buf[2];
-    struct i2c_client* client = wm_client;
+    if (reg_addr > MAX_REGISTER)
+    {
+        printk("%s:wrong reg address[reg_addr = 0x%x]\n",__FUNCTION__, reg_addr);
+        return -1;   
+    }
+    else
+    {    
+        #define DATA_MASK (0x01ff)
+        unsigned int data = value & DATA_MASK;
+        unsigned char buf[2];
 
-    buf[0] = reg_addr;
-    buf[1] = value;
+        buf[0] = (reg_addr << 1) | (data >> 8);
+        buf[1] = (data & 0xff);
 
-    ret = i2c_master_send(client, buf, 2);
-    return ret;
+        struct i2c_client* client = wm_client;
+        int ret = i2c_master_send(client, buf, 2);
+        return ret;
+    }
 }
+
 int wm8960_read(unsigned char chip_addr,unsigned char reg_addr)
 {
     int ret_data = 0xFF;
-    int ret;
+/*    int ret;
     struct i2c_client* client = wm_client;
     unsigned char buf[2];
 
@@ -116,9 +180,10 @@ int wm8960_read(unsigned char chip_addr,unsigned char reg_addr)
     if (ret >= 0)
     {
         ret_data = buf[0];
-    }
+    }*/
     return ret_data;
 }
+
 void wm8960_reg_dump(unsigned int reg_num)
 {
     unsigned int i = 0;
@@ -703,6 +768,7 @@ static struct notifier_block wm8960_reboot_notifier =
 };
 static int wm8960_device_init(unsigned int num)
 {
+    #if 0
         /* inite codec configs.*/
         unsigned char temp = 0;
         temp = wm8960_read(IIC_device_addr[num],0x2);
@@ -718,13 +784,31 @@ static int wm8960_device_init(unsigned int num)
 
     /* 注册reboot通知处理 */
     register_reboot_notifier(&wm8960_reboot_notifier);
+    #endif
+    int ret;
+    unsigned int reg_addr, value;
+    unsigned int reg_num = sizeof(wm8960_reg_defaults) / sizeof(struct reg_default);
+    for (int i = 0; i < reg_num; ++i)
+    {   
+        reg_addr = wm8960_reg_defaults[i].reg;
+        value    = wm8960_reg_defaults[i].def;
+        ret = wm8960_write(IIC_device_addr[num], reg_addr, value);
+        if (ret < 0) {
+            printk("%s:error[reg_addr = 0x%x, value = 0x%x ret = %d]\n", \
+                __FUNCTION__, reg_addr, value, ret);
+        } else {
+            printk("%s:success[reg_addr = 0x%x, value = 0x%x ret = %d]\n", \
+                __FUNCTION__, reg_addr, value, ret);
+        }
+    }
+    
     return 0;
 }
 static int wm8960_device_exit(unsigned int num)
         {
-    wm8960_write(IIC_device_addr[num], 51, 0x04);
+    // wm8960_write(IIC_device_addr[num], 51, 0x04);
 
-    wm8960_write(IIC_device_addr[num], 65, 0x04);
+    // wm8960_write(IIC_device_addr[num], 65, 0x04);
 
     	return 0;
 }  
@@ -733,9 +817,9 @@ static int i2c_client_init(void)
 {
     struct i2c_adapter* i2c_adap;
 
-    // use i2c2
+    // use i2c0
     i2c_adap = i2c_get_adapter(0);
-    wm_client = i2c_new_device(i2c_adap, &hi_info);
+    wm_client = i2c_new_device(i2c_adap, &wm8960_info);
 
     i2c_put_adapter(i2c_adap);
 
