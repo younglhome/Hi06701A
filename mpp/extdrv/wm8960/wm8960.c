@@ -164,6 +164,13 @@ int wm8960_write(unsigned char chip_addr, unsigned int reg_addr, unsigned int va
 
         struct i2c_client* client = wm_client;
         int ret = i2c_master_send(client, buf, 2);
+        if (ret < 0) {
+            printk("%s:error[reg_addr = 0x%x, value = 0x%x ret = %d]\n", \
+                __FUNCTION__, reg_addr, value, ret);
+        } else {
+            printk("%s:success[reg_addr = 0x%x, value = 0x%x ret = %d]\n", \
+                __FUNCTION__, reg_addr, value, ret);
+    	}
         return ret;
     }
 }
@@ -198,8 +205,41 @@ void wm8960_reg_dump(unsigned int reg_num)
 }
 void soft_reset(unsigned int chip_num)
 {
-    wm8960_write(IIC_device_addr[chip_num],0xf,0x0);
-    msleep(10);
+    wm8960_write(IIC_device_addr[chip_num], WM8960_RESET, 0x00);
+    msleep(250);
+    wm8960_write(IIC_device_addr[chip_num], 0x19, 0xfc);
+    msleep(250);
+    wm8960_write(IIC_device_addr[chip_num], 0x34, 0x37);
+    wm8960_write(IIC_device_addr[chip_num], 0x35, 0x86);
+    wm8960_write(IIC_device_addr[chip_num], 0x36, 0xc2);
+    wm8960_write(IIC_device_addr[chip_num], 0x37, 0x26);
+    wm8960_write(IIC_device_addr[chip_num], 0x04, 0x5);
+    wm8960_write(IIC_device_addr[chip_num], 0x08, 0x1c4);
+    wm8960_write(IIC_device_addr[chip_num], 0x07, 0x42);
+    wm8960_write(IIC_device_addr[chip_num], 0x1a, 0x1fb);
+    msleep(250);
+    wm8960_write(IIC_device_addr[chip_num], 0x2f, 0x3c);
+    wm8960_write(IIC_device_addr[chip_num], 0x00, 0x13f);
+    wm8960_write(IIC_device_addr[chip_num], 0x01, 0x13f);
+    wm8960_write(IIC_device_addr[chip_num], 0x02, 0x17f);
+    wm8960_write(IIC_device_addr[chip_num], 0x03, 0x17f);
+    wm8960_write(IIC_device_addr[chip_num], 0x05, 0x0);
+    wm8960_write(IIC_device_addr[chip_num], 0x09, 0x40);
+    wm8960_write(IIC_device_addr[chip_num], 0x0a, 0xff);
+    wm8960_write(IIC_device_addr[chip_num], 0x0b, 0xff);
+    wm8960_write(IIC_device_addr[chip_num], 0x12, 0x0);
+    wm8960_write(IIC_device_addr[chip_num], 0x15, 0xc3);
+    wm8960_write(IIC_device_addr[chip_num], 0x16, 0xc3);
+    wm8960_write(IIC_device_addr[chip_num], 0x1c, 0x8);
+    wm8960_write(IIC_device_addr[chip_num], 0x20, 0x108);
+    wm8960_write(IIC_device_addr[chip_num], 0x21, 0x108);
+    wm8960_write(IIC_device_addr[chip_num], 0x22, 0x100);
+    wm8960_write(IIC_device_addr[chip_num], 0x25, 0x100);
+    wm8960_write(IIC_device_addr[chip_num], 0x28, 0x179);
+    wm8960_write(IIC_device_addr[chip_num], 0x29, 0x179);
+    wm8960_write(IIC_device_addr[chip_num], 0x30, 0x3);
+    wm8960_write(IIC_device_addr[chip_num], 0x31, 0xf7);
+    wm8960_write(IIC_device_addr[chip_num], 0x33, 0x9b);
 }        	
 
 /*
@@ -691,6 +731,7 @@ static int wm8960_device_init(unsigned int num)
 {
     soft_reset(num);
 
+    #if 0 // reference to kernel/linux-3.10.y/sound/soc/codecs/wm8960.c
     int ret;
     unsigned int reg_addr, value;
     unsigned int reg_num = sizeof(wm8960_reg_defaults) / sizeof(struct reg_default);
@@ -707,6 +748,7 @@ static int wm8960_device_init(unsigned int num)
                 __FUNCTION__, reg_addr, value, ret);
         }
     }
+    #endif
 
     // register_reboot_notifier(&wm8960_reboot_notifier);
     
@@ -757,7 +799,7 @@ static int __init wm8960_init(void)
     }
 #else
     	ret = misc_register(&wm8960_dev);
-    	if(ret)
+    	if(ret < 0)
     	{
     		DPRINTK(0,"could not register wm8960 device");
     		return -1;
