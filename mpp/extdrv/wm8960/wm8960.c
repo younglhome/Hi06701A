@@ -205,41 +205,41 @@ void wm8960_reg_dump(unsigned int reg_num)
 }
 void soft_reset(unsigned int chip_num)
 {
-    wm8960_write(IIC_device_addr[chip_num], WM8960_RESET, 0x00);
+    wm8960_write(IIC_device_addr[chip_num], WM8960_RESET,       0x00);
     msleep(250);
-    wm8960_write(IIC_device_addr[chip_num], 0x19, 0xfc);
+    wm8960_write(IIC_device_addr[chip_num], WM8960_POWER1,      0xfc);
     msleep(250);
-    wm8960_write(IIC_device_addr[chip_num], 0x34, 0x37);
-    wm8960_write(IIC_device_addr[chip_num], 0x35, 0x86);
-    wm8960_write(IIC_device_addr[chip_num], 0x36, 0xc2);
-    wm8960_write(IIC_device_addr[chip_num], 0x37, 0x26);
-    wm8960_write(IIC_device_addr[chip_num], 0x04, 0x5);
-    wm8960_write(IIC_device_addr[chip_num], 0x08, 0x1c4);
-    wm8960_write(IIC_device_addr[chip_num], 0x07, 0x42);
-    wm8960_write(IIC_device_addr[chip_num], 0x1a, 0x1fb);
+    wm8960_write(IIC_device_addr[chip_num], WM8960_PLL1,        0x37);
+    wm8960_write(IIC_device_addr[chip_num], WM8960_PLL2,        0x86);
+    wm8960_write(IIC_device_addr[chip_num], WM8960_PLL3,        0xc2);
+    wm8960_write(IIC_device_addr[chip_num], WM8960_PLL4,        0x26);
+    wm8960_write(IIC_device_addr[chip_num], WM8960_CLOCK1,      0x5);
+    wm8960_write(IIC_device_addr[chip_num], WM8960_CLOCK2,      0x1c4);
+    wm8960_write(IIC_device_addr[chip_num], WM8960_IFACE1,      0x42);
+    wm8960_write(IIC_device_addr[chip_num], WM8960_POWER2,      0x1fb);
     msleep(250);
-    wm8960_write(IIC_device_addr[chip_num], 0x2f, 0x3c);
-    wm8960_write(IIC_device_addr[chip_num], 0x00, 0x13f);
-    wm8960_write(IIC_device_addr[chip_num], 0x01, 0x13f);
-    wm8960_write(IIC_device_addr[chip_num], 0x02, 0x17f);
-    wm8960_write(IIC_device_addr[chip_num], 0x03, 0x17f);
-    wm8960_write(IIC_device_addr[chip_num], 0x05, 0x0);
-    wm8960_write(IIC_device_addr[chip_num], 0x09, 0x40);
-    wm8960_write(IIC_device_addr[chip_num], 0x0a, 0xff);
-    wm8960_write(IIC_device_addr[chip_num], 0x0b, 0xff);
-    wm8960_write(IIC_device_addr[chip_num], 0x12, 0x0);
-    wm8960_write(IIC_device_addr[chip_num], 0x15, 0xc3);
-    wm8960_write(IIC_device_addr[chip_num], 0x16, 0xc3);
-    wm8960_write(IIC_device_addr[chip_num], 0x1c, 0x8);
-    wm8960_write(IIC_device_addr[chip_num], 0x20, 0x108);
-    wm8960_write(IIC_device_addr[chip_num], 0x21, 0x108);
-    wm8960_write(IIC_device_addr[chip_num], 0x22, 0x100);
-    wm8960_write(IIC_device_addr[chip_num], 0x25, 0x100);
-    wm8960_write(IIC_device_addr[chip_num], 0x28, 0x179);
-    wm8960_write(IIC_device_addr[chip_num], 0x29, 0x179);
-    wm8960_write(IIC_device_addr[chip_num], 0x30, 0x3);
-    wm8960_write(IIC_device_addr[chip_num], 0x31, 0xf7);
-    wm8960_write(IIC_device_addr[chip_num], 0x33, 0x9b);
+    wm8960_write(IIC_device_addr[chip_num], WM8960_POWER3,      0x3c);
+    wm8960_write(IIC_device_addr[chip_num], WM8960_LINVOL,      0x13f);
+    wm8960_write(IIC_device_addr[chip_num], WM8960_RINVOL,      0x13f);
+    wm8960_write(IIC_device_addr[chip_num], WM8960_LOUT1,       0x17f);
+    wm8960_write(IIC_device_addr[chip_num], WM8960_ROUT1,       0x17f);
+    wm8960_write(IIC_device_addr[chip_num], WM8960_DACCTL1,     0x0);
+    wm8960_write(IIC_device_addr[chip_num], WM8960_IFACE2,      0x40);
+    wm8960_write(IIC_device_addr[chip_num], WM8960_LDAC,        0xff);
+    wm8960_write(IIC_device_addr[chip_num], WM8960_RDAC,        0xff);
+    wm8960_write(IIC_device_addr[chip_num], WM8960_ALC2,        0x0);
+    wm8960_write(IIC_device_addr[chip_num], WM8960_LADC,        0xc3);
+    wm8960_write(IIC_device_addr[chip_num], WM8960_RADC,        0xc3);
+    wm8960_write(IIC_device_addr[chip_num], WM8960_APOP1,       0x8);
+    wm8960_write(IIC_device_addr[chip_num], WM8960_LINPATH,     0x108);
+    wm8960_write(IIC_device_addr[chip_num], WM8960_RINPATH,     0x108);
+    wm8960_write(IIC_device_addr[chip_num], WM8960_LOUTMIX,     0x100);
+    wm8960_write(IIC_device_addr[chip_num], WM8960_ROUTMIX,     0x100);
+    wm8960_write(IIC_device_addr[chip_num], WM8960_LOUT2,       0x179);
+    wm8960_write(IIC_device_addr[chip_num], WM8960_ROUT2,       0x179);
+    wm8960_write(IIC_device_addr[chip_num], WM8960_ADDCTL4,     0x3);
+    wm8960_write(IIC_device_addr[chip_num], WM8960_CLASSD1,     0xf7);
+    wm8960_write(IIC_device_addr[chip_num], WM8960_CLASSD3,     0x9b);
 }        	
 
 /*
