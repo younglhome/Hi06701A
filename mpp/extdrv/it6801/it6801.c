@@ -275,7 +275,7 @@ static int __init it6801_init(void)
 		delay1ms(1000);	//for power sequence
 		
 		//printk("IT6802_fsm_init\n");
-		IT6802_fsm_init();
+		IT6802_fsm_init();//initialize registers
 
 
 		init_timer(&checker);
