@@ -165,10 +165,10 @@ int wm8960_write(unsigned char chip_addr, unsigned int reg_addr, unsigned int va
         struct i2c_client* client = wm_client;
         int ret = i2c_master_send(client, buf, 2);
         if (ret < 0) {
-            printk("%s:error[reg_addr = 0x%x, value = 0x%x ret = %d]\n", \
+            printk("%s:error[reg_addr = 0x%02x, value = 0x%3x ret = %d]\n", \
                 __FUNCTION__, reg_addr, value, ret);
         } else {
-            printk("%s:success[reg_addr = 0x%x, value = 0x%x ret = %d]\n", \
+            printk("%s:success[reg_addr = 0x%02x, value = 0x%3x ret = %d]\n", \
                 __FUNCTION__, reg_addr, value, ret);
     	}
         return ret;
@@ -241,60 +241,83 @@ void wm8960_reg_dump(unsigned int reg_num)
     wm8960_write(IIC_device_addr[chip_num], WM8960_CLASSD3,     0x9b);
 }
 */
+
 static void LINPUT3_LOOPBACK_initialization(unsigned int chip_num)
 {
-  wm8960_write(IIC_device_addr[chip_num], WM8960_POWER1, 0xfc );
+  wm8960_write(IIC_device_addr[chip_num], WM8960_POWER1, 0xcc );//ENABLE ADC disaable MICBIAS
+  // wm8960_write(IIC_device_addr[chip_num], WM8960_POWER1, 0xfc );//ENABLE Analogue Input PGA and Boost disaable MICBIAS
   msleep(250);
   //wm8960_write(IIC_device_addr[chip_num], WM8960_PLL1, 0x37);
-  wm8960_write(IIC_device_addr[chip_num], WM8960_PLL2, 0x86);
-  wm8960_write(IIC_device_addr[chip_num], WM8960_PLL3, 0xc2);
-  wm8960_write(IIC_device_addr[chip_num], WM8960_PLL4, 0x26);
-  wm8960_write(IIC_device_addr[chip_num], WM8960_CLOCK1, 0x0);//Clocking
-  wm8960_write(IIC_device_addr[chip_num], WM8960_CLOCK2, 0x1c4);
-  wm8960_write(IIC_device_addr[chip_num], WM8960_IFACE1, 0x42);
-  wm8960_write(IIC_device_addr[chip_num], WM8960_POWER2, 0x1fb);
+  // wm8960_write(IIC_device_addr[chip_num], WM8960_PLL2, 0x86);
+  // wm8960_write(IIC_device_addr[chip_num], WM8960_PLL3, 0xc2);
+  // wm8960_write(IIC_device_addr[chip_num], WM8960_PLL4, 0x26);
+  /*clock*/
+  wm8960_write(IIC_device_addr[chip_num], WM8960_CLOCK1, 0x0);// SYSCLK derived from MCLK(12.288M) ADC/DAC Sample rate:48K
+  wm8960_write(IIC_device_addr[chip_num], WM8960_CLOCK2, 0x1c0);//BCLK RATE12.288M MAXIMUM WORD LENGTH:32
+  /*digital audio interface*/
+  wm8960_write(IIC_device_addr[chip_num], WM8960_IFACE1, 0x42);//master mode[6]  I2S Format[0:1]
+  // wm8960_write(IIC_device_addr[chip_num], WM8960_POWER2, 0x1E0);//ENANBLE DAC/OUT1 DISABLE PLLL SPEAKER OUT
+  wm8960_write(IIC_device_addr[chip_num], WM8960_POWER2, 0x1F8);//ENANBLE DAC/OUT1 SPEAKER DISABLE PLLL  OUT
   msleep(250);
-  wm8960_write(IIC_device_addr[chip_num], WM8960_POWER3, 0x3c);
-  wm8960_write(IIC_device_addr[chip_num], WM8960_LINVOL, 0x117);
-  wm8960_write(IIC_device_addr[chip_num], WM8960_RINVOL, 0x117);
-  wm8960_write(IIC_device_addr[chip_num], WM8960_LOUT1, 0x17f);
-  wm8960_write(IIC_device_addr[chip_num], WM8960_ROUT1, 0x17f);
+  wm8960_write(IIC_device_addr[chip_num], WM8960_POWER3, 0xc);//Output Mixer Enable
+  // wm8960_write(IIC_device_addr[chip_num], WM8960_POWER3, 0x3c);//Output Mixer Enable Input PGA Enable
+  /*Input PGA Volume Control*/
+  // wm8960_write(IIC_device_addr[chip_num], WM8960_LINVOL, 0x117);
+  // wm8960_write(IIC_device_addr[chip_num], WM8960_RINVOL, 0x117);
+  /*Headphone Volume*/
+  // wm8960_write(IIC_device_addr[chip_num], WM8960_LOUT1, 0x17f);//+6db
+  // wm8960_write(IIC_device_addr[chip_num], WM8960_ROUT1, 0x17f);//+6db
+  wm8960_write(IIC_device_addr[chip_num], WM8960_LOUT1, 0x179);//+0db
+  wm8960_write(IIC_device_addr[chip_num], WM8960_ROUT1, 0x179);//+0db
+
   wm8960_write(IIC_device_addr[chip_num], WM8960_DACCTL1, 0x0);
   wm8960_write(IIC_device_addr[chip_num], WM8960_IFACE2, 0x41);
-  wm8960_write(IIC_device_addr[chip_num], WM8960_LDAC, 0xff);
-  wm8960_write(IIC_device_addr[chip_num], WM8960_RDAC, 0xff);
-  wm8960_write(IIC_device_addr[chip_num], WM8960_LADC, 0xc3);
-  wm8960_write(IIC_device_addr[chip_num], WM8960_RADC, 0xc3);
+  /*DAC Digital Volume Control */
+  wm8960_write(IIC_device_addr[chip_num], WM8960_LDAC, 0xff);//0db
+  wm8960_write(IIC_device_addr[chip_num], WM8960_RDAC, 0xff);//0db
+  /*ADC Digital Volume Control*/
+  wm8960_write(IIC_device_addr[chip_num], WM8960_LADC, 0xc3);//0db
+  wm8960_write(IIC_device_addr[chip_num], WM8960_RADC, 0xc3);//0db
   wm8960_write(IIC_device_addr[chip_num], WM8960_APOP1, 0x8);
+  //not Connect Input PGA to Left Input Boost Mixer
   wm8960_write(IIC_device_addr[chip_num], WM8960_LINPATH, 0x0);
   wm8960_write(IIC_device_addr[chip_num], WM8960_RINPATH, 0x0);
-  wm8960_write(IIC_device_addr[chip_num], WM8960_LOUTMIX, 0x100);
-  wm8960_write(IIC_device_addr[chip_num], WM8960_ROUTMIX, 0x100);
-  wm8960_write(IIC_device_addr[chip_num], WM8960_LOUT2, 0x179);
-  wm8960_write(IIC_device_addr[chip_num], WM8960_ROUT2, 0x179);
-  wm8960_write(IIC_device_addr[chip_num], WM8960_INBMIX1, 0x7e);
-  wm8960_write(IIC_device_addr[chip_num], WM8960_INBMIX2, 0x7e);
-  wm8960_write(IIC_device_addr[chip_num], WM8960_CLASSD1, 0xf7);
-  wm8960_write(IIC_device_addr[chip_num], WM8960_CLASSD3, 0x9b);
+
+  /* Left Output Mixer*/
+  wm8960_write(IIC_device_addr[chip_num], WM8960_LOUTMIX, 0x80);
+  wm8960_write(IIC_device_addr[chip_num], WM8960_ROUTMIX, 0x80);
+
+  /*Speaker Volume:mute*/ 
+  // wm8960_write(IIC_device_addr[chip_num], WM8960_LOUT2, 0x179);
+  // wm8960_write(IIC_device_addr[chip_num], WM8960_ROUT2, 0x179);
+  wm8960_write(IIC_device_addr[chip_num], WM8960_INBMIX1, 0x70);//LINPUT3 Boost Mixer Gain +6DB
+  wm8960_write(IIC_device_addr[chip_num], WM8960_INBMIX2, 0x70);//RINPUT3 Boost Mixer Gain +6DB
+
+  /*CLASS D speaker*/
+  // wm8960_write(IIC_device_addr[chip_num], WM8960_CLASSD1, 0xf7);
+  // wm8960_write(IIC_device_addr[chip_num], WM8960_CLASSD3, 0x9b);
   wm8960_write(IIC_device_addr[chip_num], WM8960_ADDCTL1, 0x1C1);//Slow clock enabled
+  wm8960_write(IIC_device_addr[chip_num], WM8960_ADDCTL2, 0x60);//HPDETECT low = headphone
+  wm8960_write(IIC_device_addr[chip_num], WM8960_ADDCTL4, 0x02);//ADCLRC/GPIO1 used for jack detect input
+  // wm8960_write(IIC_device_addr[chip_num], WM8960_ADDCTL3, 0x40);//1 = 20kâ„¦ VMID to output
 }
 
 static void LINPUT3_BYPASS_initialization(unsigned int chip_num)
 {
-  wm8960_write(IIC_device_addr[chip_num], 0x19, 0xc0);//OK
-  wm8960_write(IIC_device_addr[chip_num], 0x1a, 0x60);//enable LOUT1/ROUT1
+  wm8960_write(IIC_device_addr[chip_num], WM8960_POWER1, 0xc0);//OK
+  wm8960_write(IIC_device_addr[chip_num], WM8960_POWER2, 0x60);//enable LOUT1/ROUT1
   msleep(250);
-  wm8960_write(IIC_device_addr[chip_num], 0x20, 0x0);
-  wm8960_write(IIC_device_addr[chip_num], 0x21, 0x0);
-  wm8960_write(IIC_device_addr[chip_num], 0x2f, 0xc);
-  wm8960_write(IIC_device_addr[chip_num], 0x22, 0x80);//0DB
-  wm8960_write(IIC_device_addr[chip_num], 0x25, 0x80);//0DB
+  wm8960_write(IIC_device_addr[chip_num], WM8960_LINPATH, 0x0);
+  wm8960_write(IIC_device_addr[chip_num], WM8960_RINPATH, 0x0);
+  wm8960_write(IIC_device_addr[chip_num], WM8960_POWER3, 0xc);
+  wm8960_write(IIC_device_addr[chip_num], WM8960_LOUTMIX, 0x80);//0DB
+  wm8960_write(IIC_device_addr[chip_num], WM8960_ROUTMIX, 0x80);//0DB
   // wm8960_write(IIC_device_addr[chip_num], 0x31, 0xf7);
   // wm8960_write(IIC_device_addr[chip_num], 0x33, 0x9b);
   // wm8960_write(IIC_device_addr[chip_num], 0x28, 0x179);
   // wm8960_write(IIC_device_addr[chip_num], 0x29, 0x179);
-  wm8960_write(IIC_device_addr[chip_num], 0x02, 0x17f);//LOUT1 Volume +6db
-  wm8960_write(IIC_device_addr[chip_num], 0x03, 0x17f);//ROUT1 Volume +6db
+  wm8960_write(IIC_device_addr[chip_num], WM8960_LOUT1, 0x179);//LOUT1 Volume +0db
+  wm8960_write(IIC_device_addr[chip_num], WM8960_ROUT1, 0x179);//ROUT1 Volume +0db
 }
 
 void soft_reset(unsigned int chip_num)
@@ -519,14 +542,14 @@ static long wm8960_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
                 ctrl_mode.bit.bit_work_dri_ctrl =  audio_ctrl->ctrl_mode;
                 wm8960_write(IIC_device_addr[chip_num],8,ctrl_mode.b8);
 #if 0
-                /* ÉèÖÃÊ±ÖÓ */
+                /* Ã‰Ã¨Ã–ÃƒÃŠÂ±Ã–Ã“ */
                 if (1 == audio_ctrl->ctrl_mode 
                     || (AC31_SET_48K_SAMPLERATE != audio_ctrl->sample && AC31_SET_44_1K_SAMPLERATE != audio_ctrl->sample))
                 {
-                    /* aic31×÷Ö÷Ä£Ê½»òÕß²ÉÑùÂÊ²»Îª44.1K/48KHZµÄÇé¿öÏÂ£¬Ê¹ÓÃÍâ²¿µÄ12.288MHZµÄ¾§Õñ×÷ÎªMCLKÊäÈë²¢²úÉúÄÚ²¿¹¤×÷Ö÷Ê±ÖÓ */
+                    /* aic31Ã—Ã·Ã–Ã·Ã„Â£ÃŠÂ½Â»Ã²Ã•ÃŸÂ²Ã‰Ã‘Ã¹Ã‚ÃŠÂ²Â»ÃÂª44.1K/48KHZÂµÃ„Ã‡Ã©Â¿Ã¶ÃÃ‚Â£Â¬ÃŠÂ¹Ã“ÃƒÃÃ¢Â²Â¿ÂµÃ„12.288MHZÂµÃ„Â¾Â§Ã•Ã±Ã—Ã·ÃÂªMCLKÃŠÃ¤ÃˆÃ«Â²Â¢Â²ÃºÃ‰ÃºÃ„ÃšÂ²Â¿Â¹Â¤Ã—Ã·Ã–Ã·ÃŠÂ±Ã–Ã“ */
                     if ((1 == audio_ctrl->if_44100hz_series))
                     {
-                        /*¡¡Èç¹ûÎª44.1KHZÏµÁĞµÄ²ÉÑùÑù */
+                        /*Â¡Â¡ÃˆÃ§Â¹Ã»ÃÂª44.1KHZÃÂµÃÃÂµÃ„Â²Ã‰Ã‘Ã¹Ã‘Ã¹ */
                         wm8960_write(IIC_device_addr[chip_num],3,0x81);    /* P=1 */ 
                         wm8960_write(IIC_device_addr[chip_num],4,0x1c);    /* J=7 */
                         wm8960_write(IIC_device_addr[chip_num],5,0x36);    /* reg 5 and 6 set D=3500*/
@@ -540,7 +563,7 @@ static long wm8960_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
                     }
                     else
                     {
-                        /*¡¡Èç¹ûÎª·Ç44.1KHZÏµÁĞµÄ²ÉÑùÑù */
+                        /*Â¡Â¡ÃˆÃ§Â¹Ã»ÃÂªÂ·Ã‡44.1KHZÃÂµÃÃÂµÃ„Â²Ã‰Ã‘Ã¹Ã‘Ã¹ */
                         wm8960_write(IIC_device_addr[chip_num],3,0x81);    /* P=1 */ 
                         wm8960_write(IIC_device_addr[chip_num],4,0x20);    /* J=8 */
                         wm8960_write(IIC_device_addr[chip_num],5,0x0);     /* reg 5 and 6 set D=0000*/
@@ -555,7 +578,7 @@ static long wm8960_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
                 }
                 else
                 {
-                    /* aic31×ö´ÓÄ£Ê½ÇÒ²ÉÑùÂÊÎª44.1K/48KHZµÄÇé¿öÏÂ£¬ÓÉBCLK²úÉúÄÚ²¿¹¤×÷Ö÷Ê±ÖÓ */
+                    /* aic31Ã—Ã¶Â´Ã“Ã„Â£ÃŠÂ½Ã‡Ã’Â²Ã‰Ã‘Ã¹Ã‚ÃŠÃÂª44.1K/48KHZÂµÃ„Ã‡Ã©Â¿Ã¶ÃÃ‚Â£Â¬Ã“Ã‰BCLKÂ²ÃºÃ‰ÃºÃ„ÃšÂ²Â¿Â¹Â¤Ã—Ã·Ã–Ã·ÃŠÂ±Ã–Ã“ */
                     wm8960_write(IIC_device_addr[chip_num],102,0x22);  /* uses PLLCLK and BCLK */
                     codec_datapath_setup_ctrl.b8 = wm8960_read(IIC_device_addr[chip_num],7);
                     if ((1 == audio_ctrl->if_44100hz_series))
@@ -576,15 +599,15 @@ static long wm8960_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
                     wm8960_write(IIC_device_addr[chip_num],11,0x2);    /* R = 2 */
                 }
 #else
- 				/* ÉèÖÃÊ±ÖÓ */
-               /* aic31,ÓÉaiaoÌá¹©mclk */             
+ 				/* Ã‰Ã¨Ã–ÃƒÃŠÂ±Ã–Ã“ */
+               /* aic31,Ã“Ã‰aiaoÃŒÃ¡Â¹Â©mclk */             
           		switch(audio_ctrl->sampleRate)
             	{
             		case 8000:
             		case 16000:
             		case 32000:
             			{
-            			    /*¡¡Èç¹ûÎª32KHZÏµÁĞµÄ²ÉÑùÑù */
+            			    /*Â¡Â¡ÃˆÃ§Â¹Ã»ÃÂª32KHZÃÂµÃÃÂµÃ„Â²Ã‰Ã‘Ã¹Ã‘Ã¹ */
 	                        wm8960_write(IIC_device_addr[chip_num],3,0x81);    /* P=1 */ 
 	                        wm8960_write(IIC_device_addr[chip_num],4,0x30);    /* J=12 */
 	                        wm8960_write(IIC_device_addr[chip_num],5,0x0);     /* reg 5 and 6 set D=0000*/
@@ -601,7 +624,7 @@ static long wm8960_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
             		case 24000:
             		case 48000:                		
             		    {
-            		        /*¡¡Èç¹ûÎª48KHZÏµÁĞµÄ²ÉÑùÑù */
+            		        /*Â¡Â¡ÃˆÃ§Â¹Ã»ÃÂª48KHZÃÂµÃÃÂµÃ„Â²Ã‰Ã‘Ã¹Ã‘Ã¹ */
 	                        wm8960_write(IIC_device_addr[chip_num],3,0x81);    /* P=1 */ 
 	                        wm8960_write(IIC_device_addr[chip_num],4,0x20);    /* J=8 */
 	                        wm8960_write(IIC_device_addr[chip_num],5,0x0);     /* reg 5 and 6 set D=0000*/
@@ -618,7 +641,7 @@ static long wm8960_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
             		case 22050:
             		case 44100:
             		    {
-                		    /*¡¡Èç¹ûÎª44.1KHZÏµÁĞµÄ²ÉÑùÑù */
+                		    /*Â¡Â¡ÃˆÃ§Â¹Ã»ÃÂª44.1KHZÃÂµÃÃÂµÃ„Â²Ã‰Ã‘Ã¹Ã‘Ã¹ */
 	                        wm8960_write(IIC_device_addr[chip_num],3,0x81);    /* P=1 */ 
 	                        wm8960_write(IIC_device_addr[chip_num],4,0x20);    /* J=7 */
 	                        wm8960_write(IIC_device_addr[chip_num],5,0x00);    /* reg 5 and 6 set D=0000*/
