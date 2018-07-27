@@ -242,10 +242,10 @@ void wm8960_reg_dump(unsigned int reg_num)
 }
 */
 
-static void LINPUT3_LOOPBACK_initialization(unsigned int chip_num)
+static void LINPUT3_MIC_BOOST_HP_initialization(unsigned int chip_num)
 {
-  wm8960_write(IIC_device_addr[chip_num], WM8960_POWER1, 0xcc );//ENABLE ADC disaable MICBIAS
-  // wm8960_write(IIC_device_addr[chip_num], WM8960_POWER1, 0xfc );//ENABLE Analogue Input PGA and Boost disaable MICBIAS
+  // wm8960_write(IIC_device_addr[chip_num], WM8960_POWER1, 0xcc );//ENABLE ADC disaable MICBIAS
+  wm8960_write(IIC_device_addr[chip_num], WM8960_POWER1, 0xfe );//ENABLE Analogue Input PGA and Boost MICBIAS
   msleep(250);
   //wm8960_write(IIC_device_addr[chip_num], WM8960_PLL1, 0x37);
   // wm8960_write(IIC_device_addr[chip_num], WM8960_PLL2, 0x86);
@@ -259,7 +259,7 @@ static void LINPUT3_LOOPBACK_initialization(unsigned int chip_num)
   // wm8960_write(IIC_device_addr[chip_num], WM8960_POWER2, 0x1E0);//ENANBLE DAC/OUT1 DISABLE PLLL SPEAKER OUT
   wm8960_write(IIC_device_addr[chip_num], WM8960_POWER2, 0x1F8);//ENANBLE DAC/OUT1 SPEAKER DISABLE PLLL  OUT
   msleep(250);
-  wm8960_write(IIC_device_addr[chip_num], WM8960_POWER3, 0xc);//Output Mixer Enable
+  wm8960_write(IIC_device_addr[chip_num], WM8960_POWER3, 0x3c);//Output Mixer/MIC Enable
   // wm8960_write(IIC_device_addr[chip_num], WM8960_POWER3, 0x3c);//Output Mixer Enable Input PGA Enable
   /*Input PGA Volume Control*/
   // wm8960_write(IIC_device_addr[chip_num], WM8960_LINVOL, 0x117);
@@ -279,13 +279,20 @@ static void LINPUT3_LOOPBACK_initialization(unsigned int chip_num)
   wm8960_write(IIC_device_addr[chip_num], WM8960_LADC, 0xc3);//0db
   wm8960_write(IIC_device_addr[chip_num], WM8960_RADC, 0xc3);//0db
   wm8960_write(IIC_device_addr[chip_num], WM8960_APOP1, 0x8);
-  //not Connect Input PGA to Left Input Boost Mixer
-  wm8960_write(IIC_device_addr[chip_num], WM8960_LINPATH, 0x0);
-  wm8960_write(IIC_device_addr[chip_num], WM8960_RINPATH, 0x0);
+  //input signal path mic
+  wm8960_write(IIC_device_addr[chip_num], WM8960_LINPATH, 0x108);//MICBOOST 0db
+  wm8960_write(IIC_device_addr[chip_num], WM8960_RINPATH, 0x108);//MICBOOST 0db
+  wm8960_write(IIC_device_addr[chip_num], WM8960_LINVOL, 0x13F);// PGA Volume 0db
+  wm8960_write(IIC_device_addr[chip_num], WM8960_RINVOL, 0x13F);// PGA Volume 0db
+  // wm8960_write(IIC_device_addr[chip_num], WM8960_LINVOL, 0x117);// PGA Volume 0db
+  // wm8960_write(IIC_device_addr[chip_num], WM8960_RINVOL, 0x117);// PGA Volume 0db
+  wm8960_write(IIC_device_addr[chip_num], WM8960_ADDCTL1, 0x1C1);//Slow clock enabled
 
-  /* Left Output Mixer*/
-  wm8960_write(IIC_device_addr[chip_num], WM8960_LOUTMIX, 0x80);
-  wm8960_write(IIC_device_addr[chip_num], WM8960_ROUTMIX, 0x80);
+  /*Output Mixer*/
+  wm8960_write(IIC_device_addr[chip_num], WM8960_LOUTMIX, 0x00);//DISABLE DAC AND LINPUT3
+  wm8960_write(IIC_device_addr[chip_num], WM8960_ROUTMIX, 0x00);//DISABLE DAC AND LINPUT3
+  wm8960_write(IIC_device_addr[chip_num], WM8960_BYPASS1, 0x80);// Input Boost Mixer 2 output mixer
+  wm8960_write(IIC_device_addr[chip_num], WM8960_BYPASS2, 0x80);// Input Boost Mixer 2 output mixer
 
   /*Speaker Volume:mute*/ 
   // wm8960_write(IIC_device_addr[chip_num], WM8960_LOUT2, 0x179);
@@ -296,7 +303,6 @@ static void LINPUT3_LOOPBACK_initialization(unsigned int chip_num)
   /*CLASS D speaker*/
   // wm8960_write(IIC_device_addr[chip_num], WM8960_CLASSD1, 0xf7);
   // wm8960_write(IIC_device_addr[chip_num], WM8960_CLASSD3, 0x9b);
-  wm8960_write(IIC_device_addr[chip_num], WM8960_ADDCTL1, 0x1C1);//Slow clock enabled
   wm8960_write(IIC_device_addr[chip_num], WM8960_ADDCTL2, 0x60);//HPDETECT low = headphone
   wm8960_write(IIC_device_addr[chip_num], WM8960_ADDCTL4, 0x02);//ADCLRC/GPIO1 used for jack detect input
   // wm8960_write(IIC_device_addr[chip_num], WM8960_ADDCTL3, 0x40);//1 = 20kΩ VMID to output
@@ -326,7 +332,7 @@ void soft_reset(unsigned int chip_num)
     msleep(250);
     // DAC_SPK_MIC_initialization(chip_num);
     // LINPUT3_BYPASS_initialization(chip_num);
-    LINPUT3_LOOPBACK_initialization(chip_num);
+    LINPUT3_MIC_BOOST_HP_initialization(chip_num);
 }        	
 
 /*
