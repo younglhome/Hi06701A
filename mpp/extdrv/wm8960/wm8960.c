@@ -242,6 +242,78 @@ void wm8960_reg_dump(unsigned int reg_num)
 }
 */
 
+static void LINPUT3_MIC_BOOST_ADC_HP_initialization(unsigned int chip_num)
+{
+  // wm8960_write(IIC_device_addr[chip_num], WM8960_POWER1, 0xcc );//ENABLE ADC disaable MICBIAS
+  unsigned int value = VMIDSEL|POWER_VREF|POWER_AINL|POWER_RINR|POWER_ADCL|POWER_ADCR|POWER_MICB;
+  wm8960_write(IIC_device_addr[chip_num], WM8960_POWER1, value);//ENABLE Analogue Input PGA and Boost MICBIAS
+  msleep(250);
+  //wm8960_write(IIC_device_addr[chip_num], WM8960_PLL1, 0x37);
+  // wm8960_write(IIC_device_addr[chip_num], WM8960_PLL2, 0x86);
+  // wm8960_write(IIC_device_addr[chip_num], WM8960_PLL3, 0xc2);
+  // wm8960_write(IIC_device_addr[chip_num], WM8960_PLL4, 0x26);
+  /*clock*/
+  wm8960_write(IIC_device_addr[chip_num], WM8960_CLOCK1, 0x0);// SYSCLK derived from MCLK(12.288M) ADC/DAC Sample rate:48K
+  // wm8960_write(IIC_device_addr[chip_num], WM8960_CLOCK1, 0x90);// SYSCLK derived from MCLK(12.288M) ADC/DAC Sample rate:24K
+  wm8960_write(IIC_device_addr[chip_num], WM8960_CLOCK2, 0x1c4);//BCLK RATE12.288M MAXIMUM WORD LENGTH:32
+  /*digital audio interface*/
+  wm8960_write(IIC_device_addr[chip_num], WM8960_IFACE1, 0x4a);//master mode[6]  I2S Format[0:1] 24bit
+  // wm8960_write(IIC_device_addr[chip_num], WM8960_IFACE1, 0xa);//slave mode[6]  I2S Format[0:1] 24bit
+  // wm8960_write(IIC_device_addr[chip_num], WM8960_POWER2, 0x1E0);//ENANBLE DAC/OUT1 DISABLE PLLL SPEAKER OUT
+  wm8960_write(IIC_device_addr[chip_num], WM8960_POWER2, 0x1F8);//ENANBLE DAC/OUT1 SPEAKER DISABLE PLLL  OUT
+  msleep(250);
+  wm8960_write(IIC_device_addr[chip_num], WM8960_POWER3, 0x3c);//Output Mixer/MIC Enable
+  // wm8960_write(IIC_device_addr[chip_num], WM8960_POWER3, 0x3c);//Output Mixer Enable Input PGA Enable
+  /*Input PGA Volume Control*/
+  // wm8960_write(IIC_device_addr[chip_num], WM8960_LINVOL, 0x117);
+  // wm8960_write(IIC_device_addr[chip_num], WM8960_RINVOL, 0x117);
+  /*Headphone Volume*/
+  // wm8960_write(IIC_device_addr[chip_num], WM8960_LOUT1, 0x17f);//+6db
+  // wm8960_write(IIC_device_addr[chip_num], WM8960_ROUT1, 0x17f);//+6db
+  wm8960_write(IIC_device_addr[chip_num], WM8960_LOUT1, 0x179);//+0db
+  wm8960_write(IIC_device_addr[chip_num], WM8960_ROUT1, 0x179);//+0db
+
+  wm8960_write(IIC_device_addr[chip_num], WM8960_DACCTL1, 0x0);//DAC Digital Soft no Mute
+  value = ALRCGPIO/* | LOOPBACK*/;//0x41
+  wm8960_write(IIC_device_addr[chip_num], WM8960_IFACE2, value);
+  /*DAC Digital Volume Control */
+  wm8960_write(IIC_device_addr[chip_num], WM8960_LDAC, 0xff);//0db
+  wm8960_write(IIC_device_addr[chip_num], WM8960_RDAC, 0xff);//0db
+  /*ADC Digital Volume Control*/
+  wm8960_write(IIC_device_addr[chip_num], WM8960_LADC, 0x1c3);//0db
+  wm8960_write(IIC_device_addr[chip_num], WM8960_RADC, 0x1c3);//0db
+  wm8960_write(IIC_device_addr[chip_num], WM8960_APOP1, 0x8);
+  //input signal path mic
+  wm8960_write(IIC_device_addr[chip_num], WM8960_LINPATH, 0x108);//MICBOOST 0db
+  wm8960_write(IIC_device_addr[chip_num], WM8960_RINPATH, 0x108);//MICBOOST 0db
+  wm8960_write(IIC_device_addr[chip_num], WM8960_LINVOL, 0x13F);// PGA Volume 0db
+  wm8960_write(IIC_device_addr[chip_num], WM8960_RINVOL, 0x13F);// PGA Volume 0db
+  // wm8960_write(IIC_device_addr[chip_num], WM8960_LINVOL, 0x117);// PGA Volume 0db
+  // wm8960_write(IIC_device_addr[chip_num], WM8960_RINVOL, 0x117);// PGA Volume 0db
+  wm8960_write(IIC_device_addr[chip_num], WM8960_ADDCTL1, 0x1C1);//Slow clock enabled
+
+  /*Output Mixer*/
+  value = LD2LO;
+  // wm8960_write(IIC_device_addr[chip_num], WM8960_LOUTMIX, value);
+  value = RD2LO;
+  // wm8960_write(IIC_device_addr[chip_num], WM8960_ROUTMIX, value);
+  wm8960_write(IIC_device_addr[chip_num], WM8960_BYPASS1, 0x80);// Input Boost Mixer 2 output mixer
+  wm8960_write(IIC_device_addr[chip_num], WM8960_BYPASS2, 0x80);// Input Boost Mixer 2 output mixer
+
+  /*Speaker Volume:mute*/ 
+  // wm8960_write(IIC_device_addr[chip_num], WM8960_LOUT2, 0x179);
+  // wm8960_write(IIC_device_addr[chip_num], WM8960_ROUT2, 0x179);
+  wm8960_write(IIC_device_addr[chip_num], WM8960_INBMIX1, 0x70);//LINPUT3 Boost Mixer Gain +6DB
+  wm8960_write(IIC_device_addr[chip_num], WM8960_INBMIX2, 0x70);//RINPUT3 Boost Mixer Gain +6DB
+
+  /*CLASS D speaker*/
+  // wm8960_write(IIC_device_addr[chip_num], WM8960_CLASSD1, 0xf7);
+  // wm8960_write(IIC_device_addr[chip_num], WM8960_CLASSD3, 0x9b);
+  wm8960_write(IIC_device_addr[chip_num], WM8960_ADDCTL2, 0x64);//HPDETECT low = headphone ADCLRC and DACLRC disabled only when ADC (Left and Right) and DAC (Left and Right) are disabled.
+  wm8960_write(IIC_device_addr[chip_num], WM8960_ADDCTL4, 0x02);//ADCLRC/GPIO1 used for jack detect input
+  // wm8960_write(IIC_device_addr[chip_num], WM8960_ADDCTL3, 0x40);//1 = 20kΩ VMID to output
+}
+
 static void LINPUT3_MIC_BOOST_HP_initialization(unsigned int chip_num)
 {
   // wm8960_write(IIC_device_addr[chip_num], WM8960_POWER1, 0xcc );//ENABLE ADC disaable MICBIAS
@@ -332,7 +404,8 @@ void soft_reset(unsigned int chip_num)
     msleep(250);
     // DAC_SPK_MIC_initialization(chip_num);
     // LINPUT3_BYPASS_initialization(chip_num);
-    LINPUT3_MIC_BOOST_HP_initialization(chip_num);
+    LINPUT3_MIC_BOOST_ADC_HP_initialization(chip_num);
+    // LINPUT3_MIC_BOOST_HP_initialization(chip_num);
 }        	
 
 /*

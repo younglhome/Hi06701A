@@ -7,6 +7,51 @@
 #ifndef _INC_WM8960
 #define  _INC_WM8960	
 
+#define VMIDSEL
+
+/*R25 (19h) Power Mgmt (1)*/
+#define VMIDSEL_OFF             (00)
+#define VMIDSEL_PLAYBACK_RECORD (01)
+#define VMIDSEL_STANDBY         (10)
+#define VMIDSEL_FAST_STARTUP    (11)
+
+#define VMIDSEL (VMIDSEL_PLAYBACK_RECORD << 7)
+#define POWER_VREF (1 << 6)
+#define POWER_AINL (1 << 5)
+#define POWER_RINR (1 << 4)
+#define POWER_ADCL (1 << 3)
+#define POWER_ADCR (1 << 2)
+#define POWER_MICB (1 << 1)
+
+#define DIGENB     (1 << 0)
+#define MASTER_CLOCK_DISABLE (DIGENB)
+
+#define ALRCGPIO (1 << 6)
+// #define WL8 (1 << 5)
+#define LOOPBACK (1 << 0)
+
+#define LD2LO (1 << 8)
+#define LI2LO (1 << 7)
+#define LI2LOVOL_MAX (000)//0db
+#define LI2LOVOL_MIN (111)//-21db
+#define LI2LOVOL (LI2LOVOL_MAX << 4)//3dB steps
+
+#define RD2LO (1 << 8)
+#define RI2LO (1 << 7)
+#define RI2LOVOL_MAX (000)//0db
+#define RI2LOVOL_MIN (111)//-21db
+#define RI2LOVOL (LI2LOVOL_MAX << 4)//3dB steps
+
+#define LB2LO (1 << 7)
+#define LB2LOVOL_MAX (000)//0db
+#define LB2LOVOL_MIN (111)//-21db
+#define LB2LOVOL (LB2LOVOL_MAX << 4)//3dB steps
+
+#define RB2LO (1 << 7)
+#define RB2LOVOL_MAX (000)//0db
+#define RB2LOVOL_MIN (111)//-21db
+#define RB2LOVOL (LB2LOVOL_MAX << 4)//3dB steps
+
 #if 1
     #define     IN2LR_2_LEFT_ADC_CTRL 0x0
     #define     IN2LR_2_RIGTH_ADC_CTRL 0x1
