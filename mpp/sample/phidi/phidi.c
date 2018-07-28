@@ -513,15 +513,15 @@ HI_S32 Phidi_VENC_Init(HI_VOID)
 HI_S32 Phidi_AENC_Init(HI_VOID)
 {
 	HI_S32 		s32Ret = 0;
+
+    //step 1: config AIP audio codec
 	AUDIO_DEV   AiDev = PHIDI_AUDIO_AI_DEV_AUDIO_CODEC;
-	AI_CHN      AiChn	= 0;
-	AENC_CHN    AeChn = 0;
 		
     AIO_ATTR_S stAioAttr;
     stAioAttr.enSamplerate = AUDIO_SAMPLE_RATE_48000;		
 	stAioAttr.enBitwidth  = AUDIO_BIT_WIDTH_16;						
 	stAioAttr.enWorkmode = AIO_MODE_I2S_SLAVE;
-    stAioAttr.enSoundmode = AUDIO_SOUND_MODE_MONO;
+    stAioAttr.enSoundmode = AUDIO_SOUND_MODE_STEREO;
     stAioAttr.u32EXFlag = 1;															//扩展成16 位，8bit到16bit 扩展标志只对AI采样精度为8bit 时有效
     stAioAttr.u32FrmNum = 30;
     stAioAttr.u32PtNumPerFrm = SAMPLE_AUDIO_PTNUMPERFRM;
@@ -529,23 +529,23 @@ HI_S32 Phidi_AENC_Init(HI_VOID)
     stAioAttr.u32ClkChnCnt   = 2;
     stAioAttr.u32ClkSel = 0;
 		
-	//step 1: config audio codec
-	/*** INNER AUDIO CODEC ***/
-    /*
+#if 0/*** INNER AUDIO CODEC ***/
     s32Ret = SAMPLE_INNER_CODEC_CfgAudio(stAioAttr.enSamplerate); 
     if (HI_SUCCESS != s32Ret)
     {
         LOGE_print("SAMPLE_INNER_CODEC_CfgAudio failed");
         return s32Ret;
     }
-	*/
-	//step 2: start Ai
+#else/*** EXTERNAL AUDIO CODEC ***/
     s32Ret = HI_MPI_AI_SetPubAttr(AiDev, &stAioAttr);
     if (s32Ret)
     {
         LOGE_print("HI_MPI_AI_SetPubAttr(%d) failed with %#x", AiDev, s32Ret);
         return HI_FAILURE;
     }
+#endif
+
+    //step 2: start Ai
     s32Ret =HI_MPI_AI_Enable(AiDev);
     if (s32Ret)
     {
@@ -553,13 +553,20 @@ HI_S32 Phidi_AENC_Init(HI_VOID)
         return HI_FAILURE;
     }
     
-    s32Ret =HI_MPI_AI_EnableChn(AiDev,AiChn);
-    if (s32Ret)
-    {
-        LOGE_print("HI_MPI_AI_EnableChn(%d,%d) failed with %#x", AiDev, AiChn, s32Ret);
-        return -1;    
+    AI_CHN AiChn;
+    int Ai_channel_num = (stAioAttr.enSoundmode == AUDIO_SOUND_MODE_STEREO) ? 1 : stAioAttr.u32ChnCnt;
+    for (int i = 0; i < Ai_channel_num; i++)
+    {     
+        AiChn   = i;   
+        s32Ret =HI_MPI_AI_EnableChn(AiDev,AiChn);
+        if (s32Ret)
+        {
+            LOGE_print("HI_MPI_AI_EnableChn(%d,%d) failed with %#x", AiDev, AiChn, s32Ret);
+            return -1;    
+        }
     }
   	//step 3: start Aenc
+    AENC_CHN    AeChn = 0;
   	
     AENC_CHN_ATTR_S stAencAttr;    
     AENC_ATTR_G711_S stAencG711;
@@ -749,8 +756,8 @@ HI_S32 Phidi_AOUT_HDMI_Init(HI_VOID)
 {
     HI_S32 s32Ret;
     AUDIO_DEV   AiDev = PHIDI_AUDIO_AI_DEV_AUDIO_CODEC;
-    AI_CHN      AiChn = 1;
-    
+    AI_CHN      AiChn = 0;
+
     AUDIO_DEV   AoDev = PHIDI_AUDIO_AO_DEV_HDMI;
     AO_CHN      AoChn = 0;
 
@@ -760,11 +767,11 @@ HI_S32 Phidi_AOUT_HDMI_Init(HI_VOID)
 	stHdmiAoAttr.enSamplerate   = AUDIO_SAMPLE_RATE_48000;
     stHdmiAoAttr.enBitwidth     = AUDIO_BIT_WIDTH_16;
     stHdmiAoAttr.enWorkmode     = AIO_MODE_I2S_MASTER;
-    stHdmiAoAttr.enSoundmode    = AUDIO_SOUND_MODE_MONO;
+    stHdmiAoAttr.enSoundmode    = AUDIO_SOUND_MODE_STEREO;
     stHdmiAoAttr.u32EXFlag      = 1;
     stHdmiAoAttr.u32FrmNum      = 30;
     stHdmiAoAttr.u32PtNumPerFrm = SAMPLE_AUDIO_PTNUMPERFRM;
-    stHdmiAoAttr.u32ChnCnt      = 1;
+    stHdmiAoAttr.u32ChnCnt      = 2;
 	stHdmiAoAttr.u32ClkChnCnt   = 2;
     stHdmiAoAttr.u32ClkSel      = 0;  
 	
@@ -773,12 +780,12 @@ HI_S32 Phidi_AOUT_HDMI_Init(HI_VOID)
 	stAoReSampleAttr.enInSampleRate = AUDIO_SAMPLE_RATE_32000;
 	stAoReSampleAttr.enOutSampleRate = AUDIO_SAMPLE_RATE_48000;
 
-	s32Ret =HI_MPI_AI_EnableChn(AiDev, AiChn);
+/*	s32Ret =HI_MPI_AI_EnableChn(AiDev, AiChn);
 	if (s32Ret)
 	{
 		LOGE_print("HI_MPI_AI_EnableChn(%d,%d) failed with %#x", AiDev, AiChn, s32Ret);
 		return -1;	  
-	}
+	}*/
 		
 	Phidi_AOUT_HdmiSet(stHdmiAoAttr);
 
