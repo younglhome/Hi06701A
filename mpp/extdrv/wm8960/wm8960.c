@@ -257,7 +257,8 @@ static void LINPUT3_MIC_BOOST_ADC_HP_initialization(unsigned int chip_num)
   // wm8960_write(IIC_device_addr[chip_num], WM8960_CLOCK1, 0x90);// SYSCLK derived from MCLK(12.288M) ADC/DAC Sample rate:24K
   wm8960_write(IIC_device_addr[chip_num], WM8960_CLOCK2, 0x1c4);//BCLK RATE12.288M MAXIMUM WORD LENGTH:32
   /*digital audio interface*/
-  wm8960_write(IIC_device_addr[chip_num], WM8960_IFACE1, 0x4a);//master mode[6]  I2S Format[0:1] 24bit
+  wm8960_write(IIC_device_addr[chip_num], WM8960_IFACE1, 0x42);//master mode[6]  I2S Format[0:1] 16bit
+  // wm8960_write(IIC_device_addr[chip_num], WM8960_IFACE1, 0x4a);//master mode[6]  I2S Format[0:1] 24bit
   // wm8960_write(IIC_device_addr[chip_num], WM8960_IFACE1, 0xa);//slave mode[6]  I2S Format[0:1] 24bit
   // wm8960_write(IIC_device_addr[chip_num], WM8960_POWER2, 0x1E0);//ENANBLE DAC/OUT1 DISABLE PLLL SPEAKER OUT
   wm8960_write(IIC_device_addr[chip_num], WM8960_POWER2, 0x1F8);//ENANBLE DAC/OUT1 SPEAKER DISABLE PLLL  OUT
