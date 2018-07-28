@@ -7,9 +7,10 @@ include ../Makefile.param
 #endif
 
 PHIDI_LIB := ./lib
-PHIDI_INC := -I./include/fdkaac
+PHIDI_INC := -I./include/fdkaac 
 
 CFLAGS += $(PHIDI_INC)
+CFLAGS += -std=gnu99
 
 # target source
 SRC  := $(wildcard *.c) 
@@ -18,7 +19,7 @@ OBJ  := $(SRC:%.c=%.o)
 TARGET := $(OBJ:%.o=%)
 .PHONY : clean all
 
-all: $(TARGET)
+all: clean $(TARGET)
 
 MPI_LIBS := $(REL_LIB)/libmpi.a
 MPI_LIBS += $(REL_LIB)/libhdmi.a
@@ -26,6 +27,7 @@ MPI_LIBS += $(REL_LIB)/libhdmi.a
 $(TARGET):%:%.o $(COMM_OBJ)
 	$(CC) $(CFLAGS) -lpthread -lm -o $@ $^ $(MPI_LIBS) $(AUDIO_LIBA) $(JPEGD_LIBA) -L$(PHIDI_LIB) -lfdk-aac
 	cp $(TARGET) $(SDK_PATH)/
+	sudo cp $(TARGET) /var/lib/tftpboot/
 
 clean:
 	@rm -f $(TARGET)
