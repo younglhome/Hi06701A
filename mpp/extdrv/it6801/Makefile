@@ -8,6 +8,7 @@ it6801drv-objs := it6801.o it680x.o IO.o
 
 default:
 	@make -C $(LINUX_ROOT) M=$(PWD) modules
+	sudo cp it6801drv.ko /var/lib/tftpboot/
 
 clean: 
 	@make -C $(LINUX_ROOT) M=$(PWD) clean

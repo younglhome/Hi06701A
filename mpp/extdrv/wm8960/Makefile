@@ -24,6 +24,7 @@ EXTRA_CFLAGS += -std=gnu99
 default:
 	@make -C $(LINUX_ROOT) M=$(PWD) modules 
 #	cp wm_8960.ko ../../../user 
+	sudo cp wm_8960.ko /var/lib/tftpboot/
 clean: 
 	@make -C $(LINUX_ROOT) M=$(PWD) clean 
 #	@-rm ../../../user/wm_8960.ko
