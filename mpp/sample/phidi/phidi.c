@@ -513,7 +513,7 @@ HI_S32 Phidi_VENC_Init(HI_VOID)
 HI_S32 Phidi_AENC_Init(HI_VOID)
 {
 	HI_S32 		s32Ret = 0;
-	AUDIO_DEV   AiDev = 1;
+	AUDIO_DEV   AiDev = PHIDI_AUDIO_AI_DEV_AUDIO_CODEC;
 	AI_CHN      AiChn	= 0;
 	AENC_CHN    AeChn = 0;
 		
@@ -748,9 +748,10 @@ HI_S32 Phidi_VOUT_HDMI_Init(HI_VOID)
 HI_S32 Phidi_AOUT_HDMI_Init(HI_VOID)
 {
     HI_S32 s32Ret;
-    AUDIO_DEV   AiDev = 1;//SAMPLE_AUDIO_AI_DEV;
+    AUDIO_DEV   AiDev = PHIDI_AUDIO_AI_DEV_AUDIO_CODEC;
     AI_CHN      AiChn = 1;
-    AUDIO_DEV   AoDev = SAMPLE_AUDIO_HDMI_AO_DEV;
+    
+    AUDIO_DEV   AoDev = PHIDI_AUDIO_AO_DEV_HDMI;
     AO_CHN      AoChn = 0;
 
     AIO_ATTR_S stHdmiAoAttr;
