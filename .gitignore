@@ -121,3 +121,5 @@ osdrv/tools/pc/mkimage_tool/fastboot/
 osdrv/tools/pc/mkimage_tool/mkimage
 osdrv/tools/pc/squashfs4.2/mksquashfs
 osdrv/tools/pc/squashfs4.2/tmp/
+osdrv/opensource/kernel/linux-3.10.y/scripts/kconfig/mconf
+

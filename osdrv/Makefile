@@ -62,7 +62,7 @@ SUPPORT_CHIP = "yes"
 endif
 ifeq ($(CHIP),hi3520dv300)
 export	UBOOT_CONFIG:=hi3520dv300_config
-export KERNEL_CFG:=hi3520dv300_full_defconfig
+export KERNEL_CFG:=hi3520dv300_liuyong_defconfig
 CHIP:=HI3520DV300
 UIMAGE:=uImage_hi3520dv300
 UBOOT:=u-boot-hi3520dv300.bin
