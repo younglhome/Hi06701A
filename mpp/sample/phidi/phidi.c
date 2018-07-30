@@ -518,13 +518,14 @@ HI_S32 Phidi_AENC_Init(HI_VOID)
 	AUDIO_DEV   AiDev = PHIDI_AUDIO_AI_DEV_AUDIO_CODEC;
 		
     AIO_ATTR_S stAioAttr;
+	HI_MPI_AI_GetPubAttr(AiDev, &stAioAttr);
     stAioAttr.enSamplerate = AUDIO_SAMPLE_RATE_48000;		
 	stAioAttr.enBitwidth  = AUDIO_BIT_WIDTH_16;						
 	stAioAttr.enWorkmode = AIO_MODE_I2S_SLAVE;
     stAioAttr.enSoundmode = AUDIO_SOUND_MODE_STEREO;
     stAioAttr.u32EXFlag = 1;															//扩展成16 位，8bit到16bit 扩展标志只对AI采样精度为8bit 时有效
     stAioAttr.u32FrmNum = 30;
-    stAioAttr.u32PtNumPerFrm = SAMPLE_AUDIO_PTNUMPERFRM;
+    stAioAttr.u32PtNumPerFrm = 1024;//SAMPLE_AUDIO_PTNUMPERFRM;
     stAioAttr.u32ChnCnt = 2;										//stereo mode must be 2 
     stAioAttr.u32ClkChnCnt   = 2;
     stAioAttr.u32ClkSel = 0;
@@ -541,7 +542,7 @@ HI_S32 Phidi_AENC_Init(HI_VOID)
     if (s32Ret)
     {
         LOGE_print("HI_MPI_AI_SetPubAttr(%d) failed with %#x", AiDev, s32Ret);
-        return HI_FAILURE;
+//        return HI_FAILURE;
     }
 #endif
 
@@ -570,12 +571,15 @@ HI_S32 Phidi_AENC_Init(HI_VOID)
   	
     AENC_CHN_ATTR_S stAencAttr;    
     AENC_ATTR_G711_S stAencG711;
+	AENC_ATTR_LPCM_S stAencLpcm;
     
-    stAencAttr.pValue = &stAencG711;
+	stAencAttr.u32BufSize 	= 30;
     stAencAttr.enType       = gs_enPayloadType;
-    stAencAttr.u32BufSize 	= 30;
-    stAencAttr.u32PtNumPerFrm	= 320;
+//	stAencAttr.u32PtNumPerFrm	= 320;
+	stAencAttr.u32PtNumPerFrm	= 1024;
+	stAencAttr.pValue 		= &stAencLpcm;
 	
+	LOGE_print("================");
     //start Audio Encode
     /* create aenc chn*/
     s32Ret = HI_MPI_AENC_CreateChn(AeChn, &stAencAttr);
@@ -762,7 +766,7 @@ HI_S32 Phidi_AOUT_HDMI_Init(HI_VOID)
     AO_CHN      AoChn = 0;
 
     AIO_ATTR_S stHdmiAoAttr;
-	AUDIO_RESAMPLE_ATTR_S stAoReSampleAttr;
+//	AUDIO_RESAMPLE_ATTR_S stAoReSampleAttr;
 
 	stHdmiAoAttr.enSamplerate   = AUDIO_SAMPLE_RATE_48000;
     stHdmiAoAttr.enBitwidth     = AUDIO_BIT_WIDTH_16;
@@ -776,9 +780,9 @@ HI_S32 Phidi_AOUT_HDMI_Init(HI_VOID)
     stHdmiAoAttr.u32ClkSel      = 0;  
 	
 	/* ao 8k -> 48k */
-	stAoReSampleAttr.u32InPointNum	= SAMPLE_AUDIO_PTNUMPERFRM;
-	stAoReSampleAttr.enInSampleRate = AUDIO_SAMPLE_RATE_32000;
-	stAoReSampleAttr.enOutSampleRate = AUDIO_SAMPLE_RATE_48000;
+//	stAoReSampleAttr.u32InPointNum	= SAMPLE_AUDIO_PTNUMPERFRM;
+//	stAoReSampleAttr.enInSampleRate = AUDIO_SAMPLE_RATE_32000;
+//	stAoReSampleAttr.enOutSampleRate = AUDIO_SAMPLE_RATE_48000;
 
 /*	s32Ret =HI_MPI_AI_EnableChn(AiDev, AiChn);
 	if (s32Ret)
