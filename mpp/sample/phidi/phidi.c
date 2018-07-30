@@ -1,4 +1,4 @@
-/******************************************************************************
+ï»¿/******************************************************************************
   A simple program of Hisilicon HI3531 video encode implementation.
   Copyright (C), 2010-2011, Hisilicon Tech. Co., Ltd.
  ******************************************************************************
@@ -617,8 +617,7 @@ HI_S32 Phidi_AENC_Init(HI_VOID)
     stAioAttr.enSoundmode = AUDIO_SOUND_MODE_STEREO;
     stAioAttr.u32EXFlag = 1;										//À©Õ¹³É16 Î»£¬8bitµ½16bit À©Õ¹±êÖ¾Ö»¶ÔAI²ÉÑù¾«¶ÈÎª8bit Ê±ÓÐÐ§
     stAioAttr.u32FrmNum = 30;
-    stAioAttr.u32PtNumPerFrm = 1024;//SAMPLE_AUDIO_PTNUMPERFRM;
-//    stAioAttr.u32PtNumPerFrm = 320;
+    stAioAttr.u32PtNumPerFrm = SAMPLE_AUDIO_PTNUMPERFRM;
     stAioAttr.u32ChnCnt = 2;										//stereo mode must be 2 
     stAioAttr.u32ClkChnCnt   = 2;
     stAioAttr.u32ClkSel = 0;
@@ -673,7 +672,7 @@ HI_S32 Phidi_AENC_Init(HI_VOID)
 	stAencAttr.enType       = gs_enPayloadType;
 //	stAencAttr.u32PtNumPerFrm	= 320;
 //	stAencAttr.pValue 		= &stAencG711;
-	stAencAttr.u32PtNumPerFrm	= 1024;
+	stAencAttr.u32PtNumPerFrm	= SAMPLE_AUDIO_PTNUMPERFRM;
 	stAencAttr.pValue 		= &stAencLpcm;
 
 	LOGE_print("================");
