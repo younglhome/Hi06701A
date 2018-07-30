@@ -63,8 +63,8 @@
 #include <sound/wm8960.h>
 
 
-#include "wm8960.h"
-#include "wm8960_def.h"
+#include "wm_8960.h"
+#include "wm_8960_def.h"
 
 #ifdef CONFIG_HISI_SNAPSHOT_BOOT
 #include "himedia.h"
