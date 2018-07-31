@@ -7,28 +7,41 @@
 #ifndef _INC_WM8960
 #define  _INC_WM8960	
 
-#define VMIDSEL
-
 /*R25 (19h) Power Mgmt (1)*/
 #define VMIDSEL_OFF             (00)
 #define VMIDSEL_PLAYBACK_RECORD (01)
 #define VMIDSEL_STANDBY         (10)
 #define VMIDSEL_FAST_STARTUP    (11)
 
-#define VMIDSEL (VMIDSEL_PLAYBACK_RECORD << 7)
-#define POWER_VREF (1 << 6)
-#define POWER_AINL (1 << 5)
-#define POWER_RINR (1 << 4)
-#define POWER_ADCL (1 << 3)
-#define POWER_ADCR (1 << 2)
-#define POWER_MICB (1 << 1)
+#define MASK_VMIDSEL (0x3 << 7)
+#define MASK_VREF (1 << 6)
+#define MASK_AINL (1 << 5)
+#define MASK_RINR (1 << 4)
+#define MASK_ADCL (1 << 3)
+#define MASK_ADCR (1 << 2)
+#define MASK_MICB (1 << 1)
+
+enum Vmid_Divider {
+    Vmid_disabled = 0,
+    Vmid_divider_2x50kOhm,
+    Vmid_divider_2x250kOhm,
+    Vmid_divider_2x5kOhm,
+};
+
+#define VMID_FOR_PLAYBACK_RECORD (Vmid_divider_2x50kOhm)
+#define VMID_FOR_LOWPOWER_STANDBY (Vmid_divider_2x250kOhm)
+#define VMID_FOR_FAST_STARTUP (Vmid_divider_2x5kOhm)
+
+#define VMIDSEL(x)    (x << 7)
+#define POWER_VREF(x) (x << 6)
+#define POWER_AINL(x) (x << 5)
+#define POWER_RINR(x) (x << 4)
+#define POWER_ADCL(x) (x << 3)
+#define POWER_ADCR(x) (x << 2)
+#define POWER_MICB(x) (x << 1)
 
 #define DIGENB     (1 << 0)
 #define MASTER_CLOCK_DISABLE (DIGENB)
-
-#define ALRCGPIO (1 << 6)
-// #define WL8 (1 << 5)
-#define LOOPBACK (1 << 0)
 
 #define LD2LO (1 << 8)
 #define LI2LO (1 << 7)
@@ -41,16 +54,6 @@
 #define RI2LOVOL_MAX (000)//0db
 #define RI2LOVOL_MIN (111)//-21db
 #define RI2LOVOL (LI2LOVOL_MAX << 4)//3dB steps
-
-#define LB2LO (1 << 7)
-#define LB2LOVOL_MAX (000)//0db
-#define LB2LOVOL_MIN (111)//-21db
-#define LB2LOVOL (LB2LOVOL_MAX << 4)//3dB steps
-
-#define RB2LO (1 << 7)
-#define RB2LOVOL_MAX (000)//0db
-#define RB2LOVOL_MIN (111)//-21db
-#define RB2LOVOL (LB2LOVOL_MAX << 4)//3dB steps
 
 #if 1
     #define     IN2LR_2_LEFT_ADC_CTRL 0x0
@@ -242,19 +245,64 @@
         // Input PGA Volume Update
         #define SWITCH_IPVU(x) (x << 8)
         #define MASK_IPVU (1 << 8)
+        //Input PGA Zero Cross Detector
+        #define SWITCH_LIZC(x) (x << 6)
+        #define MASK_LIZC (1 << 6)
         // Input PGA Volume Control 
         #define INVOL_VALUE(x) (x)// 0.75dB steps
         #define INVOL_MASK (0x3f)
     #define WM8960_LINVOL       0x0
     #define WM8960_RINVOL       0x1
 
+//Headphone Volume Update
+#define SWITCH_OUT1VU(x) (x << 8)
+#define MASK_OUT1VU (1 << 8)
+// zero cross enable        
+#define SWITCH_O1ZC(x) (x << 7)
+#define MASK_O1ZC (1 << 7)
+// LOUT1 Volume        
+#define SWITCH_OUT1VOL(x) (x + 0x79)//-73DB <= x <= 6db mute: x < -73db
+#define MASK_OUT1VOL (0x7f << 0)
     #define WM8960_LOUT1        0x2
     #define WM8960_ROUT1        0x3
     #define WM8960_CLOCK1       0x4
+// ADC High Pass Filter Disable        
+#define SWITCH_ADCHPD(x) (x)
+#define MASK_ADCHPD (1)
     #define WM8960_DACCTL1      0x5
     #define WM8960_DACCTL2      0x6
+enum Master_Slave_Mode_Control {
+    digital_slave_mode = 0,
+    digital_master_mode = 1,
+};
+#define SWITCH_MS(x) (x << 6)
+#define MASK_MS (1 << 6)
+enum Audio_Data_Word_Length {
+    Audio_Data_16bits = 0,
+    Audio_Data_20bits,
+    Audio_Data_24bits,
+    Audio_Data_32bits,
+};
+#define SWITCH_WL(x) (x << 2)
+#define MASK_WL (3 << 2)
+enum Audio_Data_Format_Select {
+    Audio_Data_Format_Right_justified = 0,
+    Audio_Data_Format_Left_justified,
+    Audio_Data_Format_I2S,
+    Audio_Data_Format_DSP_Mode,
+};
+#define SWITCH_FORMAT(x) (x)
+#define MASK_FORMAT (3)
     #define WM8960_IFACE1       0x7
     #define WM8960_CLOCK2       0x8
+enum ADCLRC_GPIO1_Pin_Function_Select {
+    ADCLRC_GPIO1_Pin_ADCLRC = 0,
+    ADCLRC_GPIO1_Pin_GPIO = 1,
+};
+#define SWITCH_ALRCGPIO(x) (x << 6)
+#define MASK_ALRCGPIO (1 << 6)
+#define SWITCH_LOOPBACK(x) (x)
+#define MASK_LOOPBACK (1)
     #define WM8960_IFACE2       0x9
     #define WM8960_LDAC     0xa
     #define WM8960_RDAC     0xb
@@ -270,6 +318,10 @@
     #define WM8960_ADDCTL1      0x17
     #define WM8960_ADDCTL2      0x18
     #define WM8960_POWER1       0x19
+#define LOUT1_MASK (1 << 6)        
+#define ROUT1_MASK (1 << 5)        
+#define POWER_LOUT1(x) (x << 6)        
+#define POWER_ROUT1(x) (x << 5)        
     #define WM8960_POWER2       0x1a
     #define WM8960_ADDCTL3      0x1b
     #define WM8960_APOP1        0x1c
@@ -321,9 +373,56 @@
     #define WM8960_INBMIX1      0x2b
     #define WM8960_INBMIX2      0x2c
 
+#define B2O_MASK (1 << 7)
+#define B2O_ENABLE(x) (x << 7)   
+enum Input_Boost_to_Output_Volume {
+    B2O_VOL_DB_0 = 0x0,
+    B2O_VOL_DB_n3,
+    B2O_VOL_DB_n6,
+    B2O_VOL_DB_n9,
+    B2O_VOL_DB_n12,
+    B2O_VOL_DB_n15,
+    B2O_VOL_DB_n18,
+    B2O_VOL_DB_n21,
+};
+#define B2OVOL_MASK (0x7 << 4)
+#define B2OVOL(x) (x << 4)
     #define WM8960_BYPASS1      0x2d
     #define WM8960_BYPASS2      0x2e
+#define LMIC_MASK  (1 << 5)        
+#define RMIC_MASK  (1 << 4)        
+#define LOMIX_MASK (1 << 3)        
+#define ROMIX_MASK (1 << 2)        
+#define POWER_LMIC(x)  (x << 5)        
+#define POWER_RMIC(x)  (x << 4)        
+#define POWER_LOMIX(x) (x << 3)        
+#define POWER_ROMIX(x) (x << 2)        
     #define WM8960_POWER3       0x2f
+enum Microphone_Bias_Voltage_Control {
+    Mic_Bias_Voltage_0dot9_AVDD = 0,
+    Mic_Bias_Voltage_0dot65_AVDD = 1,
+};
+#define MBSEL_MASK (1 << 0)
+#define MBSEL(x) (x << 0)
+enum GPIO_Function_Select{
+    GPIO_Function_Jack_detect_input = 0x0,
+    GPIO_Function_Reserved,
+    GPIO_Function_Temperature_ok,
+    GPIO_Function_Debounced_jack_detect_output,
+    GPIO_Function_SYSCLK_output,
+    GPIO_Function_PLL_lock,
+    GPIO_Function_Logic_0,
+    GPIO_Function_Logic_1,  
+};
+#define GPIOSEL_MASK (0x7 << 4)
+#define GPIOSEL(x) (x << 0)
+enum Headphone_Switch_Input_Select {
+    HP_SWITCH_SEL_GPIO1 = 0x0,//or ox1,Requires ADCLRC pin to be configured as a GPIO
+    HP_SWITCH_SEL_JD2 = 0x2,
+    HP_SWITCH_SEL_JD3 = 0x3,
+};
+#define HPSEL_MASK (0x3 << 2)
+#define HPSEL(x) (x << 0)
     #define WM8960_ADDCTL4      0x30
     #define WM8960_CLASSD1      0x31
 

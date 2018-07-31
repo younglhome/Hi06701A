@@ -235,90 +235,45 @@ void wm8960_reg_dump(unsigned int reg_num)
     }
 }
 
-/*static void DAC_SPK_MIC_initialization(unsigned int chip_num)
-{
-    wm8960_write(WM8960_POWER1,      0xfc);
-    msleep(250);
-    wm8960_write(WM8960_PLL1,        0x37);
-    wm8960_write(WM8960_PLL2,        0x86);
-    wm8960_write(WM8960_PLL3,        0xc2);
-    wm8960_write(WM8960_PLL4,        0x26);
-    wm8960_write(WM8960_CLOCK1,      0x5);
-    wm8960_write(WM8960_CLOCK2,      0x1c4);
-    wm8960_write(WM8960_IFACE1,      0x42);
-    wm8960_write(WM8960_POWER2,      0x1fb);
-    msleep(250);
-    wm8960_write(WM8960_POWER3,      0x3c);
-    wm8960_write(WM8960_LINVOL,      0x13f);
-    wm8960_write(WM8960_RINVOL,      0x13f);
-    wm8960_write(WM8960_LOUT1,       0x17f);
-    wm8960_write(WM8960_ROUT1,       0x17f);
-    wm8960_write(WM8960_DACCTL1,     0x0);
-    wm8960_write(WM8960_IFACE2,      0x40);// headphone Jack detect input
-    wm8960_write(WM8960_LDAC,        0xff);
-    wm8960_write(WM8960_RDAC,        0xff);
-    wm8960_write(WM8960_ALC2,        0x0);
-    wm8960_write(WM8960_LADC,        0xc3);
-    wm8960_write(WM8960_RADC,        0xc3);
-    wm8960_write(WM8960_APOP1,       0x8);
-    wm8960_write(WM8960_LINPATH,     0x108);
-    wm8960_write(WM8960_RINPATH,     0x108);
-    wm8960_write(WM8960_LOUTMIX,     0x100);
-    wm8960_write(WM8960_ROUTMIX,     0x100);
-    wm8960_write(WM8960_LOUT2,       0x179);
-    wm8960_write(WM8960_ROUT2,       0x179);
-    wm8960_write(WM8960_ADDCTL4,     0x3);
-    wm8960_write(WM8960_CLASSD1,     0xf7);
-    wm8960_write(WM8960_CLASSD3,     0x9b);
-}
-*/
-
 static void LINPUT3_MIC_BOOST_ADC_HP_initialization(unsigned int chip_num)
 {
-  // wm8960_write(WM8960_POWER1, 0xcc );//ENABLE ADC disaable MICBIAS
   unsigned int mask,value;
-  value = VMIDSEL|POWER_VREF|POWER_AINL|POWER_RINR|POWER_ADCL|POWER_ADCR|POWER_MICB;
-  wm8960_write(WM8960_POWER1, value);//ENABLE Analogue Input PGA and Boost MICBIAS
-  msleep(250);
-  //wm8960_write(WM8960_PLL1, 0x37);
-  // wm8960_write(WM8960_PLL2, 0x86);
-  // wm8960_write(WM8960_PLL3, 0xc2);
-  // wm8960_write(WM8960_PLL4, 0x26);
+
+  value = VMIDSEL(VMID_FOR_LOWPOWER_STANDBY) |
+          POWER_VREF(1) |
+          POWER_AINL(1) |
+          POWER_RINR(1) |
+          POWER_ADCL(1) |
+          POWER_ADCR(1) |
+          POWER_MICB(1);
+  mask = MASK_VMIDSEL | MASK_VREF | MASK_AINL | MASK_RINR | MASK_ADCL | MASK_ADCR | MASK_MICB;
+  wm8960_register_update(WM8960_POWER1, mask, value);
+  msleep(10);
   /*clock*/
   wm8960_write(WM8960_CLOCK1, 0x0);// SYSCLK derived from MCLK(12.288M) ADC/DAC Sample rate:48K
-  // wm8960_write(WM8960_CLOCK1, 0x90);// SYSCLK derived from MCLK(12.288M) ADC/DAC Sample rate:24K
   wm8960_write(WM8960_CLOCK2, 0x1c4);//BCLK RATE12.288M MAXIMUM WORD LENGTH:32
   /*digital audio interface*/
-  wm8960_write(WM8960_IFACE1, 0x42);//master mode[6]  I2S Format[0:1] 16bit
-  // wm8960_write(WM8960_IFACE1, 0x4a);//master mode[6]  I2S Format[0:1] 24bit
-  // wm8960_write(WM8960_IFACE1, 0xa);//slave mode[6]  I2S Format[0:1] 24bit
-  // wm8960_write(WM8960_POWER2, 0x1E0);//ENANBLE DAC/OUT1 DISABLE PLLL SPEAKER OUT
-  wm8960_write(WM8960_POWER2, 0x1F8);//ENANBLE DAC/OUT1 SPEAKER DISABLE PLLL  OUT
-  msleep(250);
-  wm8960_write(WM8960_POWER3, 0x3c);//Output Mixer/MIC Enable
-  // wm8960_write(WM8960_POWER3, 0x3c);//Output Mixer Enable Input PGA Enable
-  /*Input PGA Volume Control*/
-  // wm8960_write(WM8960_LINVOL, 0x117);
-  // wm8960_write(WM8960_RINVOL, 0x117);
-  /*Headphone Volume*/
-  // wm8960_write(WM8960_LOUT1, 0x17f);//+6db
-  // wm8960_write(WM8960_ROUT1, 0x17f);//+6db
-  wm8960_write(WM8960_LOUT1, 0x179);//+0db
-  wm8960_write(WM8960_ROUT1, 0x179);//+0db
+  value = SWITCH_MS(digital_master_mode) |
+          SWITCH_WL(Audio_Data_16bits) |
+          SWITCH_FORMAT(Audio_Data_Format_I2S);
+  mask = MASK_MS | MASK_WL | MASK_FORMAT;
+  wm8960_register_update(WM8960_IFACE1, mask, value);
+  mask = LOUT1_MASK | ROUT1_MASK;
+  value = POWER_LOUT1(1) | 
+          POWER_ROUT1(1);
+  wm8960_register_update(WM8960_POWER2, mask, value);  
+  msleep(10);
+  mask = LMIC_MASK | RMIC_MASK | LOMIX_MASK | ROMIX_MASK;
+  value = POWER_LMIC(1) |
+          POWER_RMIC(1) |
+          POWER_LOMIX(1) |
+          POWER_ROMIX(1);
+  wm8960_register_update(WM8960_POWER3, mask, value);
 
-  wm8960_write(WM8960_DACCTL1, 0x0);//DAC Digital Soft no Mute
-  value = ALRCGPIO/* | LOOPBACK*/;//0x41
-  wm8960_write(WM8960_IFACE2, value);
-  /*DAC Digital Volume Control */
-  wm8960_write(WM8960_LDAC, 0xff);//0db
-  wm8960_write(WM8960_RDAC, 0xff);//0db
-  /*ADC Digital Volume Control*/
-  wm8960_write(WM8960_LADC, 0x1c3);//0db
-  wm8960_write(WM8960_RADC, 0x1c3);//0db
-  wm8960_write(WM8960_APOP1, 0x8);
-  //input signal path mic
-  value = SWITCH_INMUTE(0)|INVOL_VALUE(INPUT_PGA_VOL_DB_21)|SWITCH_IPVU(1);
-  mask = MASK_INMUTE|INVOL_MASK|MASK_IPVU;
+  /*input signal path*/
+  // mic
+  value = SWITCH_INMUTE(0)|INVOL_VALUE(INPUT_PGA_VOL_DB_21)|SWITCH_IPVU(1)|SWITCH_LIZC(1);
+  mask = MASK_INMUTE|INVOL_MASK|MASK_IPVU|MASK_LIZC;
   wm8960_register_update(WM8960_LINVOL, mask, value);
   wm8960_register_update(WM8960_RINVOL, mask, value);
 
@@ -327,32 +282,51 @@ static void LINPUT3_MIC_BOOST_ADC_HP_initialization(unsigned int chip_num)
   wm8960_register_update(WM8960_LINPATH, mask, value);
   wm8960_register_update(WM8960_RINPATH, mask, value);
 
-  //input signal path [LINE INPUT 3]
+  //[LINE INPUT 3]
   mask = IN3BOOST_MASK;
   value = IN3BOOST_GAIN(LINE_input_Boost_gain_DB_0);
-  wm8960_register_update(WM8960_INBMIX1, mask, value);//LINPUT3 Boost Mixer Gain +6DB
-  wm8960_register_update(WM8960_INBMIX2, mask, value);//RINPUT3 Boost Mixer Gain +6DB
+  wm8960_register_update(WM8960_INBMIX1, mask, value);
+  wm8960_register_update(WM8960_INBMIX2, mask, value);
+
+  /* output path */
+  //Output Mixer
+  mask = B2O_MASK | B2OVOL_MASK;
+  value = B2O_ENABLE(1) | 
+          B2OVOL(B2O_VOL_DB_n12);
+  wm8960_register_update(WM8960_BYPASS1, mask, value);
+  wm8960_register_update(WM8960_BYPASS2, mask, value);
+  // value = LD2LO;
+  // wm8960_write(WM8960_LOUTMIX, value);
+  // value = RD2LO;
+  // wm8960_write(WM8960_ROUTMIX, value);
+  
+  //Headphone Volume
+  mask = MASK_OUT1VU | MASK_O1ZC | MASK_OUT1VOL;
+  value = SWITCH_OUT1VU(1) | 
+          SWITCH_O1ZC(1) | 
+          SWITCH_OUT1VOL(0);
+  wm8960_register_update(WM8960_LOUT1, mask, value);
+  wm8960_register_update(WM8960_ROUT1, mask, value);
+
+  mask = MASK_ADCHPD;
+  value = SWITCH_ADCHPD(0);
+  wm8960_register_update(WM8960_DACCTL1, mask, value);
+  mask = MASK_ALRCGPIO;
+  value = SWITCH_ALRCGPIO(ADCLRC_GPIO1_Pin_GPIO);
+  wm8960_register_update(WM8960_IFACE2, mask, value);
+  /*ADC Digital Volume Control*/
+  wm8960_write(WM8960_LADC, 0x1c3);//0db
+  wm8960_write(WM8960_RADC, 0x1c3);//0db
+  wm8960_write(WM8960_APOP1, 0x8);
 
   wm8960_write(WM8960_ADDCTL1, 0x1C1);//Slow clock enabled
 
-  /*Output Mixer*/
-  value = LD2LO;
-  // wm8960_write(WM8960_LOUTMIX, value);
-  value = RD2LO;
-  // wm8960_write(WM8960_ROUTMIX, value);
-  wm8960_write(WM8960_BYPASS1, 0x80);// Input Boost Mixer 2 output mixer
-  wm8960_write(WM8960_BYPASS2, 0x80);// Input Boost Mixer 2 output mixer
-
-  /*Speaker Volume:mute*/ 
-  // wm8960_write(WM8960_LOUT2, 0x179);
-  // wm8960_write(WM8960_ROUT2, 0x179);
-
-  /*CLASS D speaker*/
-  // wm8960_write(WM8960_CLASSD1, 0xf7);
-  // wm8960_write(WM8960_CLASSD3, 0x9b);
   wm8960_write(WM8960_ADDCTL2, 0x64);//HPDETECT low = headphone ADCLRC and DACLRC disabled only when ADC (Left and Right) and DAC (Left and Right) are disabled.
-  wm8960_write(WM8960_ADDCTL4, 0x02);//ADCLRC/GPIO1 used for jack detect input
-  // wm8960_write(WM8960_ADDCTL3, 0x40);//1 = 20kΩ VMID to output
+  mask = HPSEL_MASK | GPIOSEL_MASK | MBSEL_MASK;  
+  value = HPSEL(HP_SWITCH_SEL_GPIO1) |
+          GPIOSEL(GPIO_Function_Jack_detect_input) |
+          MBSEL(Mic_Bias_Voltage_0dot65_AVDD);  
+  wm8960_register_update(WM8960_ADDCTL4, mask, value);
 }
 
 static void LINPUT3_MIC_BOOST_HP_initialization(unsigned int chip_num)
