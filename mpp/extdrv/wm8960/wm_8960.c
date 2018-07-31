@@ -79,9 +79,9 @@
 
 static unsigned int IIC_device_addr[CHIP_NUM] = {0x34};
 
-static const struct reg_default wm_8960_reg_defaults[] = {
-	{  0x0, 0x00a7 },
-	{  0x1, 0x00a7 },
+static struct reg_default wm_8960_reg_defaults[] = {
+	{  0x0, 0x0097 },
+	{  0x1, 0x0097 },
 	{  0x2, 0x0000 },
 	{  0x3, 0x0000 },
 	{  0x4, 0x0000 },
@@ -191,6 +191,37 @@ int wm8960_read(unsigned char reg_addr)
     return -1;
 }
 
+static void wm8960_update_regTable(unsigned int reg_addr, unsigned int value)
+{
+    unsigned int reg_num = sizeof(wm_8960_reg_defaults) / sizeof(struct reg_default);
+    for (int i = 0; i < reg_num; ++i)
+    {
+      if (wm_8960_reg_defaults[i].reg == reg_addr)
+      {
+        wm_8960_reg_defaults[i].def = value;
+        return;
+      }
+    }
+
+    printk("wrong reg addr!!!\n");
+}
+
+static int wm8960_register_update(unsigned int reg_addr, unsigned int mask, unsigned int value)
+{
+  unsigned int temp_val;
+  unsigned int original_val = wm8960_read(reg_addr);
+  temp_val = original_val & (~mask);
+  temp_val = temp_val | (value & mask);
+  int ret_val = wm8960_write(reg_addr, temp_val);
+  if (ret_val < 0)
+  {
+    printk("%s: failed!!!",__FUNCTION__);
+  } else {
+    wm8960_update_regTable(reg_addr, temp_val);
+    // update table;
+  }
+}
+
 void wm8960_reg_dump(unsigned int reg_num)
 {
     unsigned int i = 0;
@@ -245,7 +276,8 @@ void wm8960_reg_dump(unsigned int reg_num)
 static void LINPUT3_MIC_BOOST_ADC_HP_initialization(unsigned int chip_num)
 {
   // wm8960_write(WM8960_POWER1, 0xcc );//ENABLE ADC disaable MICBIAS
-  unsigned int value = VMIDSEL|POWER_VREF|POWER_AINL|POWER_RINR|POWER_ADCL|POWER_ADCR|POWER_MICB;
+  unsigned int mask,value;
+  value = VMIDSEL|POWER_VREF|POWER_AINL|POWER_RINR|POWER_ADCL|POWER_ADCR|POWER_MICB;
   wm8960_write(WM8960_POWER1, value);//ENABLE Analogue Input PGA and Boost MICBIAS
   msleep(250);
   //wm8960_write(WM8960_PLL1, 0x37);
@@ -285,13 +317,22 @@ static void LINPUT3_MIC_BOOST_ADC_HP_initialization(unsigned int chip_num)
   wm8960_write(WM8960_RADC, 0x1c3);//0db
   wm8960_write(WM8960_APOP1, 0x8);
   //input signal path mic
-  wm8960_write(WM8960_LINPATH, 0x008);//MICBOOST 0db
-  wm8960_write(WM8960_RINPATH, 0x008);//MICBOOST 0db
+  value = SWITCH_INMUTE(0)|INVOL_VALUE(INPUT_PGA_VOL_DB_21)|SWITCH_IPVU(1);
+  mask = MASK_INMUTE|INVOL_MASK|MASK_IPVU;
+  wm8960_register_update(WM8960_LINVOL, mask, value);
+  wm8960_register_update(WM8960_RINVOL, mask, value);
 
-  wm8960_write(WM8960_LINVOL, 0x13F);// PGA Volume 0db
-  wm8960_write(WM8960_RINVOL, 0x13F);// PGA Volume 0db
-  // wm8960_write(WM8960_LINVOL, 0x117);// PGA Volume 0db
-  // wm8960_write(WM8960_RINVOL, 0x117);// PGA Volume 0db
+  value = SWITCH_MIC2B(1)|MICBOOST_GAIN(Input_PGA_Boost_Gain_0dB)|SWITCH_MN1(1);
+  mask = MASK_MIC2B|MICBOOST_MASK|MASK_MN1;
+  wm8960_register_update(WM8960_LINPATH, mask, value);
+  wm8960_register_update(WM8960_RINPATH, mask, value);
+
+  //input signal path [LINE INPUT 3]
+  mask = IN3BOOST_MASK;
+  value = IN3BOOST_GAIN(LINE_input_Boost_gain_DB_0);
+  wm8960_register_update(WM8960_INBMIX1, mask, value);//LINPUT3 Boost Mixer Gain +6DB
+  wm8960_register_update(WM8960_INBMIX2, mask, value);//RINPUT3 Boost Mixer Gain +6DB
+
   wm8960_write(WM8960_ADDCTL1, 0x1C1);//Slow clock enabled
 
   /*Output Mixer*/
@@ -305,8 +346,6 @@ static void LINPUT3_MIC_BOOST_ADC_HP_initialization(unsigned int chip_num)
   /*Speaker Volume:mute*/ 
   // wm8960_write(WM8960_LOUT2, 0x179);
   // wm8960_write(WM8960_ROUT2, 0x179);
-  wm8960_write(WM8960_INBMIX1, 0x70);//LINPUT3 Boost Mixer Gain +6DB
-  wm8960_write(WM8960_INBMIX2, 0x70);//RINPUT3 Boost Mixer Gain +6DB
 
   /*CLASS D speaker*/
   // wm8960_write(WM8960_CLASSD1, 0xf7);

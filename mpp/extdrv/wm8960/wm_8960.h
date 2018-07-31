@@ -165,11 +165,89 @@
 
 /* WM8960 register space */
 
+
 #if 1 //from kernel/.../codec/wm8960.h
     #define WM8960_CACHEREGNUM  56
 
+		enum input_pga_vol {
+			INPUT_PGA_VOL_DB_n17dot25 = 0x0,
+			INPUT_PGA_VOL_DB_n16dot5,
+			INPUT_PGA_VOL_DB_n15dot75,
+			INPUT_PGA_VOL_DB_n15,
+			INPUT_PGA_VOL_DB_n14dot25,
+			INPUT_PGA_VOL_DB_n13dot5,
+			INPUT_PGA_VOL_DB_n12dot75,
+			INPUT_PGA_VOL_DB_n12,
+			INPUT_PGA_VOL_DB_n11dot25,
+			INPUT_PGA_VOL_DB_n10dot5,
+			INPUT_PGA_VOL_DB_n9dot75,
+			INPUT_PGA_VOL_DB_n9,
+			INPUT_PGA_VOL_DB_n8dot25,
+			INPUT_PGA_VOL_DB_n7dot5,
+			INPUT_PGA_VOL_DB_n6dot75,
+			INPUT_PGA_VOL_DB_n6,
+			INPUT_PGA_VOL_DB_n5dot25,
+			INPUT_PGA_VOL_DB_n4dot5,
+			INPUT_PGA_VOL_DB_n3dot75,
+			INPUT_PGA_VOL_DB_n3,
+			INPUT_PGA_VOL_DB_n2dot25,
+			INPUT_PGA_VOL_DB_n1dot5,
+			INPUT_PGA_VOL_DB_n0dot75,
+			INPUT_PGA_VOL_DB_0,
+			INPUT_PGA_VOL_DB_0dot75,
+			INPUT_PGA_VOL_DB_1dot5,
+			INPUT_PGA_VOL_DB_2dot25,
+			INPUT_PGA_VOL_DB_3,
+			INPUT_PGA_VOL_DB_3dot75,
+			INPUT_PGA_VOL_DB_4dot5,
+			INPUT_PGA_VOL_DB_5dot25,
+			INPUT_PGA_VOL_DB_6,
+			INPUT_PGA_VOL_DB_6dot75,
+			INPUT_PGA_VOL_DB_7dot5,
+			INPUT_PGA_VOL_DB_8dot25,
+			INPUT_PGA_VOL_DB_9,
+			INPUT_PGA_VOL_DB_9dot75,
+			INPUT_PGA_VOL_DB_10dot5,
+			INPUT_PGA_VOL_DB_11dot25,
+			INPUT_PGA_VOL_DB_12,
+			INPUT_PGA_VOL_DB_12dot75,
+			INPUT_PGA_VOL_DB_13dot5,
+			INPUT_PGA_VOL_DB_14dot25,
+			INPUT_PGA_VOL_DB_15,
+			INPUT_PGA_VOL_DB_15dot75,
+			INPUT_PGA_VOL_DB_16dot5,
+			INPUT_PGA_VOL_DB_17dot25,
+			INPUT_PGA_VOL_DB_18,
+			INPUT_PGA_VOL_DB_18dot75,
+			INPUT_PGA_VOL_DB_19dot5,
+			INPUT_PGA_VOL_DB_20dot25,
+			INPUT_PGA_VOL_DB_21,
+			INPUT_PGA_VOL_DB_21dot75,
+			INPUT_PGA_VOL_DB_22dot5,
+			INPUT_PGA_VOL_DB_23dot25,
+			INPUT_PGA_VOL_DB_24,
+			INPUT_PGA_VOL_DB_24dot75,
+			INPUT_PGA_VOL_DB_25dot5,
+			INPUT_PGA_VOL_DB_26dot25,
+			INPUT_PGA_VOL_DB_27,
+			INPUT_PGA_VOL_DB_27dot75,
+			INPUT_PGA_VOL_DB_28dot5,
+			INPUT_PGA_VOL_DB_29dot25,
+			INPUT_PGA_VOL_DB_30,
+		};
+
+        // Input PGA Analogue Mute
+        #define SWITCH_INMUTE(x) (x << 7)
+        #define MASK_INMUTE (1 << 7)
+        // Input PGA Volume Update
+        #define SWITCH_IPVU(x) (x << 8)
+        #define MASK_IPVU (1 << 8)
+        // Input PGA Volume Control 
+        #define INVOL_VALUE(x) (x)// 0.75dB steps
+        #define INVOL_MASK (0x3f)
     #define WM8960_LINVOL       0x0
     #define WM8960_RINVOL       0x1
+
     #define WM8960_LOUT1        0x2
     #define WM8960_ROUT1        0x3
     #define WM8960_CLOCK1       0x4
@@ -197,8 +275,29 @@
     #define WM8960_APOP1        0x1c
     #define WM8960_APOP2        0x1d
 
+        //Input PGA to Input BoostMixer
+        #define MASK_MIC2B (1 << 3)
+        #define SWITCH_MIC2B(x) (x << 3)
+        // Connect LINPUT1 to inverting input of Left Input PGA 
+        #define MASK_MN1 (1 << 8)
+        #define SWITCH_MN1(x) (x << 8)
+        // Connect LINPUT2 to non-inverting input of Left Input PGA 
+        #define SWITCH_MP2(x) (x << 6)
+        #define MASK_MP2 (1 << 6)
+        // Connect LINPUT3 to non-inverting input of Left Input PGA 
+        #define SWITCH_MP3(x) (x << 7)
+        #define MASK_MP3 (1 << 7)
+    enum Input_PGA_Boost_Gain {
+        Input_PGA_Boost_Gain_0dB = 0x0,
+        Input_PGA_Boost_Gain_13dB,
+        Input_PGA_Boost_Gain_20dB,
+        Input_PGA_Boost_Gain_29dB,
+    };
+    #define MICBOOST_MASK (111 << 4)
+    #define MICBOOST_GAIN(x) (x << 4)
     #define WM8960_LINPATH      0x20
     #define WM8960_RINPATH      0x21
+
     #define WM8960_LOUTMIX      0x22
 
     #define WM8960_ROUTMIX      0x25
@@ -207,8 +306,21 @@
     #define WM8960_LOUT2        0x28
     #define WM8960_ROUT2        0x29
     #define WM8960_MONO     0x2a
+    enum input3_Boost_Mixer_gain {
+        LINE_input_Boost_gain_MUTE =0,
+        LINE_input_Boost_gain_DB_n12,
+        LINE_input_Boost_gain_DB_n9,
+        LINE_input_Boost_gain_DB_n6,
+        LINE_input_Boost_gain_DB_n3,
+        LINE_input_Boost_gain_DB_0,
+        LINE_input_Boost_gain_DB_3,
+        LINE_input_Boost_gain_DB_6,
+    };
+    #define IN3BOOST_MASK (111 << 4)
+    #define IN3BOOST_GAIN(x) (x << 4)
     #define WM8960_INBMIX1      0x2b
     #define WM8960_INBMIX2      0x2c
+
     #define WM8960_BYPASS1      0x2d
     #define WM8960_BYPASS2      0x2e
     #define WM8960_POWER3       0x2f
