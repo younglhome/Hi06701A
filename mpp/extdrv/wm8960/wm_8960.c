@@ -285,8 +285,9 @@ static void LINPUT3_MIC_BOOST_ADC_HP_initialization(unsigned int chip_num)
   wm8960_write(WM8960_RADC, 0x1c3);//0db
   wm8960_write(WM8960_APOP1, 0x8);
   //input signal path mic
-  wm8960_write(WM8960_LINPATH, 0x108);//MICBOOST 0db
-  wm8960_write(WM8960_RINPATH, 0x108);//MICBOOST 0db
+  wm8960_write(WM8960_LINPATH, 0x008);//MICBOOST 0db
+  wm8960_write(WM8960_RINPATH, 0x008);//MICBOOST 0db
+
   wm8960_write(WM8960_LINVOL, 0x13F);// PGA Volume 0db
   wm8960_write(WM8960_RINVOL, 0x13F);// PGA Volume 0db
   // wm8960_write(WM8960_LINVOL, 0x117);// PGA Volume 0db
