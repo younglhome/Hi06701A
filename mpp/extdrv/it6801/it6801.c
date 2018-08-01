@@ -92,7 +92,7 @@ static vin_resolution_id_e it6801_vin_get_resolution(void)
 {
 	int width  = it6801_vin_get_width();
 	int height = it6801_vin_get_heigth();	
-	printk("Vin width[%d],height[%d]\n",width,height); 
+	// printk("Vin width[%d],height[%d]\n",width,height); 
 	switch(width)
 	{
 		case 1920:
