@@ -123,3 +123,10 @@ osdrv/tools/pc/squashfs4.2/mksquashfs
 osdrv/tools/pc/squashfs4.2/tmp/
 osdrv/opensource/kernel/linux-3.10.y/scripts/kconfig/mconf
 
+# ignore some link file
+it6801
+output/
+phidi
+wm8960
+mpp/extdrv/btn_drv/btn_drv_test
+mpp/extdrv/led_drv/led_drv_test
