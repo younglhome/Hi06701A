@@ -864,10 +864,46 @@ HI_S32 Phidi_VOUT_HDMI_UnInit(HI_VOID)
 HI_S32 Phidi_AOUT_HDMI_Init(HI_VOID)
 {
     HI_S32 s32Ret;
-    AUDIO_DEV   AiDev = PHIDI_AUDIO_AI_DEV_CODEC;
-    AI_CHN      AiChn = 1;
+    AUDIO_DEV   AiDev = PHIDI_AUDIO_AI_DEV_HDMI;
+    AI_CHN      AiChn = 0;
     AUDIO_DEV   AoDev = PHIDI_AUDIO_AO_DEV_HDMI;
     AO_CHN      AoChn = 0;
+	AIO_ATTR_S stAioAttr;
+
+	HI_MPI_AI_GetPubAttr(AiDev, &stAioAttr);
+	
+	stAioAttr.enSamplerate = AUDIO_SAMPLE_RATE_48000;		
+	stAioAttr.enBitwidth  = AUDIO_BIT_WIDTH_16; 					
+	stAioAttr.enWorkmode = AIO_MODE_I2S_SLAVE;
+	stAioAttr.enSoundmode = AUDIO_SOUND_MODE_STEREO;
+	stAioAttr.u32EXFlag = 1;										//扩展成16 位，8bit到16bit 扩展标志只对AI采样精度为8bit 时有效
+	stAioAttr.u32FrmNum = 30;
+	stAioAttr.u32PtNumPerFrm = SAMPLE_AUDIO_PTNUMPERFRM;
+	stAioAttr.u32ChnCnt = 2;										//stereo mode must be 2 
+	stAioAttr.u32ClkChnCnt	 = 2;
+	stAioAttr.u32ClkSel = 0;
+		
+	//step 2: start Ai
+	s32Ret = HI_MPI_AI_SetPubAttr(AiDev, &stAioAttr);
+	if (s32Ret)
+	{
+		LOGE_print("HI_MPI_AI_SetPubAttr(%d) failed with %#x", AiDev, s32Ret);
+//		  return HI_FAILURE;
+	}
+	
+	s32Ret =HI_MPI_AI_Enable(AiDev);
+	if (s32Ret)
+	{
+		LOGE_print("HI_MPI_AI_Enable(%d) failed with %#x", AiDev, s32Ret);
+		return HI_FAILURE;
+	}
+	
+	s32Ret =HI_MPI_AI_EnableChn(AiDev,AiChn);
+	if (s32Ret)
+	{
+		LOGE_print("HI_MPI_AI_EnableChn(%d,%d) failed with %#x", AiDev, AiChn, s32Ret);
+		return -1;	  
+	}
 
     AIO_ATTR_S stHdmiAoAttr;
 //	AUDIO_RESAMPLE_ATTR_S stAoReSampleAttr;
@@ -875,7 +911,7 @@ HI_S32 Phidi_AOUT_HDMI_Init(HI_VOID)
 	stHdmiAoAttr.enSamplerate   = AUDIO_SAMPLE_RATE_48000;
     stHdmiAoAttr.enBitwidth     = AUDIO_BIT_WIDTH_16;
     stHdmiAoAttr.enWorkmode     = AIO_MODE_I2S_MASTER;
-    stHdmiAoAttr.enSoundmode    = AUDIO_SOUND_MODE_MONO;
+    stHdmiAoAttr.enSoundmode    = AUDIO_SOUND_MODE_STEREO;
     stHdmiAoAttr.u32EXFlag      = 1;
     stHdmiAoAttr.u32FrmNum      = 30;
     stHdmiAoAttr.u32PtNumPerFrm = SAMPLE_AUDIO_PTNUMPERFRM;
@@ -888,12 +924,12 @@ HI_S32 Phidi_AOUT_HDMI_Init(HI_VOID)
 //	stAoReSampleAttr.enInSampleRate = AUDIO_SAMPLE_RATE_32000;
 //	stAoReSampleAttr.enOutSampleRate = AUDIO_SAMPLE_RATE_48000;
 
-	s32Ret =HI_MPI_AI_EnableChn(AiDev, AiChn);
+	/*s32Ret =HI_MPI_AI_EnableChn(AiDev, AiChn);
 	if (s32Ret)
 	{
 		LOGE_print("HI_MPI_AI_EnableChn(%d,%d) failed with %#x", AiDev, AiChn, s32Ret);
 		return -1;	  
-	}
+	}*/
 		
 	Phidi_AOUT_HdmiSet(stHdmiAoAttr);
 
