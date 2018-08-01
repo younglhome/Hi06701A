@@ -128,3 +128,5 @@ it6801
 output/
 phidi
 wm8960
+mpp/extdrv/btn_drv/btn_drv_test
+mpp/extdrv/led_drv/led_drv_test
