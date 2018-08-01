@@ -288,6 +288,13 @@ static void LINPUT3_MIC_BOOST_ADC_HP_initialization(unsigned int chip_num)
   wm8960_register_update(WM8960_INBMIX1, mask, value);
   wm8960_register_update(WM8960_INBMIX2, mask, value);
 
+  /*ADC Digital Volume Control*/
+  mask = MASK_ADCVU | MASK_ADCVOL;
+  value = SWITCH_ADCVU(1) | 
+          ADCVOL(0);
+  wm8960_register_update(WM8960_LADC, mask, value);
+  wm8960_register_update(WM8960_RADC, mask, value);
+
   /* output path */
   //Output Mixer
   mask = B2O_MASK | B2OVOL_MASK;
@@ -314,14 +321,17 @@ static void LINPUT3_MIC_BOOST_ADC_HP_initialization(unsigned int chip_num)
   mask = MASK_ALRCGPIO;
   value = SWITCH_ALRCGPIO(ADCLRC_GPIO1_Pin_GPIO);
   wm8960_register_update(WM8960_IFACE2, mask, value);
-  /*ADC Digital Volume Control*/
-  wm8960_write(WM8960_LADC, 0x1c3);//0db
-  wm8960_write(WM8960_RADC, 0x1c3);//0db
-  wm8960_write(WM8960_APOP1, 0x8);
 
-  wm8960_write(WM8960_ADDCTL1, 0x1C1);//Slow clock enabled
+  // wm8960_write(WM8960_APOP1, 0x8);
+  mask = MASK_TOEN;
+  value = SWITCH_TOEN(1);
+  wm8960_register_update(WM8960_ADDCTL1, mask, value);
 
-  wm8960_write(WM8960_ADDCTL2, 0x64);//HPDETECT low = headphone ADCLRC and DACLRC disabled only when ADC (Left and Right) and DAC (Left and Right) are disabled.
+  mask = MASK_HPSWEN | MASK_HPSWPOL | MASK_LRCM;
+  value = SWITCH_HPSWEN(1) | 
+          SWITCH_HPSWPOL(1) | 
+          SWITCH_LRCM(1);
+  wm8960_register_update(WM8960_ADDCTL2, mask, value);
   mask = HPSEL_MASK | GPIOSEL_MASK | MBSEL_MASK;  
   value = HPSEL(HP_SWITCH_SEL_GPIO1) |
           GPIOSEL(GPIO_Function_Jack_detect_input) |

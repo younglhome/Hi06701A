@@ -313,9 +313,32 @@ enum ADCLRC_GPIO1_Pin_Function_Select {
     #define WM8960_ALC2     0x12
     #define WM8960_ALC3     0x13
     #define WM8960_NOISEG       0x14
+
+#define ADCVOL_MUTE (0)// -97db <= x <= 30db mute: x= -98db
+#define ADCVOL(x) ((x * 2) + 0xc3)// 0.5dB steps -97db <= x <= 30db mute: x= -98db
+#define MASK_ADCVOL (0xff)
+#define SWITCH_ADCVU(x) (x << 8)
+#define MASK_ADCVU (1 << 8)
     #define WM8960_LADC     0x15
     #define WM8960_RADC     0x16
+// Enables Slow Clock for Volume Update Timeout and Jack Detect Debounce 
+#define SWITCH_TOEN(x) (x)
+#define MASK_TOEN (1)
     #define WM8960_ADDCTL1      0x17
+
+//Headphone Switch Enable
+#define SWITCH_HPSWEN(x) (x << 6)
+#define MASK_HPSWEN (1 << 6)
+// Headphone Switch Polarity
+// 0 = HPDETECT high = headphone
+// 1 = HPDETECT high = speaker
+#define SWITCH_HPSWPOL(x) (x << 5)
+#define MASK_HPSWPOL (1 << 5)
+//Selects disable mode for ADCLRC and DACLRC (Master mode)
+//0 = ADCLRC disabled when ADC (Left and Right) disabled; DACLRC disabled when DAC (Left and Right) disabled. 
+//1 = ADCLRC and DACLRC disabled only when ADC (Left and Right) and DAC (Left and Right) are disabled. 
+#define SWITCH_LRCM(x) (x << 2)
+#define MASK_LRCM (1 << 2)
     #define WM8960_ADDCTL2      0x18
     #define WM8960_POWER1       0x19
 #define LOUT1_MASK (1 << 6)        
